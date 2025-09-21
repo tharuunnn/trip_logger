@@ -1,0 +1,12 @@
+# Environment
+.env
+
+# Virtual Environment
+venv/
+
+# Python
+__pycache__/
+*.pyc
+
+# Node / React
+frontend/node_modules/

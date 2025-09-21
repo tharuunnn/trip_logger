@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -41,6 +43,7 @@ INSTALLED_APPS = [
      # Third-party
     'rest_framework',
     'corsheaders',
+    'django_ratelimit',
 
     # Local
     'trips',
@@ -130,3 +133,27 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+ORS_API_KEY = config("ORS_API_KEY")
+DEBUG = config("DEBUG", default=True, cast=bool)
+
+# Cache configuration for route calculations
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        },
+        'KEY_PREFIX': 'trip_logger',
+        'TIMEOUT': 3600,  # 1 hour cache timeout
+    }
+}
+
+# Rate limiting configuration
+RATELIMIT_USE_CACHE = 'default'
+RATELIMIT_ENABLE = True
+
+# OpenRouteService API configuration
+ORS_BASE_URL = "https://api.openrouteservice.org/v2"
+ORS_RATE_LIMIT = 2000  # requests per day (free tier)

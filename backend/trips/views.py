@@ -3,8 +3,10 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, action
 from rest_framework.permissions import AllowAny
+from django_ratelimit.decorators import ratelimit
 from .models import Trip, DailyLog
 from .serializers import TripSerializer, TripDetailSerializer, DailyLogSerializer
+from .utils import calculate_trip_route, generate_daily_logs, calculate_eld_compliance
 
 
 class TripViewSet(viewsets.ModelViewSet): # model viewset provides all the CRUD operations
@@ -30,6 +32,58 @@ class TripViewSet(viewsets.ModelViewSet): # model viewset provides all the CRUD 
         logs = trip.daily_logs.all()
         serializer = DailyLogSerializer(logs, many=True)
         return Response(serializer.data)
+    
+    @ratelimit(key='ip', rate='10/h', method='POST', block=True)
+    @action(detail=True, methods=['post'])
+    def calculate_route(self, request, pk=None):
+        """Calculate route and generate daily logs for a trip with rate limiting."""
+        trip = self.get_object()
+        
+        # Get current location from request (in real app, this would come from GPS)
+        current_location = request.data.get('current_location', {
+            'lat': 40.7128, 'lon': -74.0060, 'address': 'Current Location'
+        })
+        
+        pickup_location = {
+            'lat': 41.8781, 'lon': -87.6298, 
+            'address': trip.pickup_location
+        }
+        dropoff_location = {
+            'lat': 34.0522, 'lon': -118.2437, 
+            'address': trip.dropoff_location
+        }
+        
+        try:
+            # Calculate route using OpenRouteService API
+            route = calculate_trip_route(current_location, pickup_location, dropoff_location)
+            
+            # Generate daily logs
+            daily_logs = generate_daily_logs(
+                trip.start_time, 
+                route['total_trip_time'], 
+                float(trip.cycle_used_hours),
+                trip.driver_name
+            )
+            
+            # Check ELD compliance
+            compliance = calculate_eld_compliance(
+                route['total_trip_time'], 
+                float(trip.cycle_used_hours)
+            )
+            
+            return Response({
+                'trip_id': trip.id,
+                'route': route,
+                'daily_logs': daily_logs,
+                'compliance': compliance,
+                'cached': not route.get('api_used', True)  # Indicates if result was cached
+            })
+            
+        except Exception as e:
+            return Response({
+                'error': f'Route calculation failed: {str(e)}',
+                'trip_id': trip.id
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class DailyLogViewSet(viewsets.ModelViewSet):
