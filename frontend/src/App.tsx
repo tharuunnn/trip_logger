@@ -1,29 +1,28 @@
-import { Link, Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import "./App.css";
-
-function Home() {
-  return (
-    <h1 className="text-3xl font-bold text-center mt-10">
-      Welcome to Trip Logger!
-    </h1>
-  );
-}
-
-function Trips() {
-  return <h1 className="text-3xl font-bold text-center mt-10">Trips Page</h1>;
-}
+import Navbar from "./components/Navbar";
+import DailyLogFormPage from "./pages/DailyLogFormPage";
+import HomePage from "./pages/HomePage";
+import TripDetailPage from "./pages/TripDetailPage";
+import TripFormPage from "./pages/TripFormPage";
+import TripsPage from "./pages/TripsPage";
 
 function App() {
   return (
     <Router>
-      <nav className="flex gap-4 p-4 bg-gray-200">
-        <Link to="/">Home</Link>
-        <Link to="/trips">Trips</Link>
-      </nav>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/trips" element={<Trips />} />
-      </Routes>
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/trips" element={<TripsPage />} />
+          <Route path="/trips/new" element={<TripFormPage />} />
+          <Route path="/trips/:id" element={<TripDetailPage />} />
+          <Route
+            path="/trips/:tripId/logs/new"
+            element={<DailyLogFormPage />}
+          />
+        </Routes>
+      </div>
     </Router>
   );
 }
