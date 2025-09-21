@@ -1,9 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 /* Leaflet CSS */
 @import "leaflet/dist/leaflet.css";
+@import "tailwindcss";
 
 /* Custom styles for Trip Logger */
 body {

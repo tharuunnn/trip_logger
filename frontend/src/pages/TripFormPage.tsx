@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { tripAPI } from "../services/api";
+import type { ValidationError } from "../utils/validation";
+
 import {
   getFieldError,
   hasFieldError,
   validateTripForm,
-  ValidationError,
 } from "../utils/validation";
 
 const TripFormPage = () => {

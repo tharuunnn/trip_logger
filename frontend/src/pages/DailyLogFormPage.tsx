@@ -1,11 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { logAPI, tripAPI } from "../services/api";
-import {
-  hasFieldError,
-  validateDailyLogForm,
-  ValidationError,
-} from "../utils/validation";
+import type { ValidationError } from "../utils/validation";
+import { hasFieldError, validateDailyLogForm } from "../utils/validation";
 
 interface Trip {
   id: number;
