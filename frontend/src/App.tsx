@@ -9,7 +9,7 @@ function Home() {
   );
 }
 
-function Trips() {
+function Trips() {ist trips + daily logs).
   return <h1 className="text-3xl font-bold text-center mt-10">Trips Page</h1>;
 }
 
