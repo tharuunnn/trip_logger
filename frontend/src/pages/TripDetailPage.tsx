@@ -51,6 +51,8 @@ const TripDetailPage = () => {
       setError(
         err.response?.data?.detail || err.message || "An error occurred"
       );
+    } finally {
+      setLoading(false);
     }
   };
 

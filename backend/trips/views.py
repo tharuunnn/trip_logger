@@ -7,6 +7,7 @@ from django_ratelimit.decorators import ratelimit
 from .models import Trip, DailyLog
 from .serializers import TripSerializer, TripDetailSerializer, DailyLogSerializer
 from .utils import calculate_trip_route, generate_daily_logs, calculate_eld_compliance
+from django.utils.decorators import method_decorator
 
 
 class TripViewSet(viewsets.ModelViewSet): # model viewset provides all the CRUD operations
@@ -33,7 +34,7 @@ class TripViewSet(viewsets.ModelViewSet): # model viewset provides all the CRUD 
         serializer = DailyLogSerializer(logs, many=True)
         return Response(serializer.data)
     
-    @ratelimit(key='ip', rate='10/h', method='POST', block=True)
+    @method_decorator(ratelimit(key='ip', rate='10/h', method='POST', block=True))
     @action(detail=True, methods=['post'])
     def calculate_route(self, request, pk=None):
         """Calculate route and generate daily logs for a trip with rate limiting."""

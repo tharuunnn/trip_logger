@@ -141,12 +141,14 @@ DEBUG = config("DEBUG", default=True, cast=bool)
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'LOCATION': 'redis://:tIOzGcsTTmGKQyA0mTqf34UhlPqX3E23@redis-14737.c301.ap-south-1-1.ec2.redns.redis-cloud.com:14737/0',
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         },
         'KEY_PREFIX': 'trip_logger',
         'TIMEOUT': 3600,  # 1 hour cache timeout
+
+        
     }
 }
 
@@ -157,3 +159,5 @@ RATELIMIT_ENABLE = True
 # OpenRouteService API configuration
 ORS_BASE_URL = "https://api.openrouteservice.org/v2"
 ORS_RATE_LIMIT = 2000  # requests per day (free tier)
+ 
+ 

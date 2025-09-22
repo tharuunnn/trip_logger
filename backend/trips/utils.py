@@ -5,7 +5,7 @@ This module contains the business logic for:
 - Route calculation using OpenRouteService API
 - Stop planning (pickup, dropoff, rest breaks, fuel)
 - Daily log generation for ELD compliance
-- Caching and rate limiting for API calls
+- Caching and  for API calls (ratelimiting handled in views.py)
 """
 
 import requests
@@ -15,7 +15,6 @@ from datetime import datetime, timedelta
 from typing import List, Dict, Tuple, Optional
 from django.core.cache import cache
 from django.conf import settings
-from django_ratelimit.decorators import ratelimit
 from django.utils.decorators import method_decorator
 import logging
 
@@ -41,9 +40,8 @@ class OpenRouteServiceClient:
         coords_str = f"{start_coords[0]},{start_coords[1]}_{end_coords[0]},{end_coords[1]}"
         return f"route_{hashlib.md5(coords_str.encode()).hexdigest()}"
     
-    @ratelimit(key='ip', rate='100/h', method='POST', block=True)
     def get_route(self, start_coords: Tuple[float, float], 
-                 end_coords: Tuple[float, float]) -> Dict:
+                  end_coords: Tuple[float, float]) -> Dict:
         """
         Get route from OpenRouteService API with caching.
         
