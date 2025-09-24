@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useLayoutEffect, useState } from 'react';
+import React, { createContext, useContext, useLayoutEffect, useState } from 'react';
 
 interface ThemeContextType {
   isDarkMode: boolean;
@@ -32,11 +32,16 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
   // Apply the 'dark' class before paint to avoid flicker and ensure global toggle
   useLayoutEffect(() => {
+    const el = document.documentElement;
+    // Normalize classes first
+    el.classList.remove('dark');
+    el.classList.remove('light');
+
     if (isDarkMode) {
-      document.documentElement.classList.add('dark');
+      el.classList.add('dark');
       localStorage.setItem('theme', 'dark');
     } else {
-      document.documentElement.classList.remove('dark');
+      el.classList.add('light');
       localStorage.setItem('theme', 'light');
     }
     // Debug: verify class on <html>

@@ -141,10 +141,10 @@ const DailyLogFormPage = () => {
 
   if (error && !trip) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="text-red-600 text-xl mb-4">⚠️ Error</div>
-          <p className="text-gray-600 mb-4">{error}</p>
+          <p className="text-gray-600 dark:text-gray-300 mb-4">{error}</p>
           <button
             onClick={() => navigate("/trips")}
             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
@@ -157,25 +157,25 @@ const DailyLogFormPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Add to Log</h1>
-          <p className="mt-2 text-gray-600">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Add to Log</h1>
+          <p className="mt-2 text-gray-600 dark:text-gray-300">
             {trip &&
               `For Trip #${trip.id}: ${trip.pickup_location} → ${trip.dropoff_location}`}
           </p>
         </div>
 
         {/* Form */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Date */}
             <div>
               <label
                 htmlFor="day"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
                 Date *
               </label>
@@ -186,7 +186,7 @@ const DailyLogFormPage = () => {
                 value={formData.day}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-900 dark:text-gray-100"
               />
             </div>
 
@@ -194,7 +194,7 @@ const DailyLogFormPage = () => {
             <div>
               <label
                 htmlFor="status"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
                 Status *
               </label>
@@ -204,7 +204,7 @@ const DailyLogFormPage = () => {
                 value={formData.status}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-900 dark:text-gray-100"
               >
                 {statusOptions.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -218,7 +218,7 @@ const DailyLogFormPage = () => {
             <div>
               <label
                 htmlFor="start_time"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
                 Start Time *
               </label>
@@ -229,7 +229,7 @@ const DailyLogFormPage = () => {
                 value={formData.start_time}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-900 dark:text-gray-100"
               />
             </div>
 
@@ -237,7 +237,7 @@ const DailyLogFormPage = () => {
             <div>
               <label
                 htmlFor="duration_hours"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
                 Duration (hours) *
               </label>
@@ -250,7 +250,7 @@ const DailyLogFormPage = () => {
                 required
                 min="0"
                 step="0.1"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-900 dark:text-gray-100"
                 placeholder="0.0"
               />
             </div>
@@ -259,7 +259,7 @@ const DailyLogFormPage = () => {
             <div>
               <label
                 htmlFor="remarks"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
                 Remarks
               </label>
@@ -269,7 +269,7 @@ const DailyLogFormPage = () => {
                 value={formData.remarks}
                 onChange={handleChange}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-900 dark:text-gray-100"
                 placeholder="Any additional notes or remarks..."
               />
             </div>
@@ -289,11 +289,11 @@ const DailyLogFormPage = () => {
             )}
 
             {/* Form Actions */}
-            <div className="flex justify-end space-x-4 pt-6 border-t">
+            <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700">
               <button
                 type="button"
                 onClick={() => navigate(`/trips/${tripId}`)}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
                 Cancel
               </button>
@@ -333,11 +333,11 @@ const DailyLogFormPage = () => {
         </div>
 
         {/* ELD Compliance Info */}
-        <div className="mt-8 bg-yellow-50 rounded-lg p-6">
-          <h3 className="text-lg font-medium text-yellow-900 mb-2">
+        <div className="mt-8 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg p-6">
+          <h3 className="text-lg font-medium text-yellow-900 dark:text-yellow-200 mb-2">
             📋 ELD Compliance Information
           </h3>
-          <ul className="text-sm text-yellow-800 space-y-1">
+          <ul className="text-sm text-yellow-800 dark:text-yellow-200 space-y-1">
             <li>• Maximum 11 hours of driving per day</li>
             <li>• Minimum 10 hours off duty required</li>
             <li>• 30-minute rest break required after 8 hours of driving</li>

@@ -2,14 +2,14 @@ import { Link } from "react-router-dom";
 
 const HomePage = () => {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero Section */}
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 sm:text-5xl md:text-6xl">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 sm:text-5xl md:text-6xl">
             Welcome to Trip Logger
           </h1>
-          <p className="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+          <p className="mt-3 max-w-md mx-auto text-base text-gray-500 dark:text-gray-300 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
             Your comprehensive solution for US trucker trip management, ELD
             compliance, and route optimization.
           </p>
@@ -19,7 +19,7 @@ const HomePage = () => {
         <div className="mt-20">
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {/* Trip Management */}
-            <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
               <div className="p-6">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
@@ -28,13 +28,13 @@ const HomePage = () => {
                     </div>
                   </div>
                   <div className="ml-4">
-                    <h3 className="text-lg font-medium text-gray-900">
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
                       Trip Management
                     </h3>
                   </div>
                 </div>
                 <div className="mt-4">
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-500 dark:text-gray-300">
                     Create, track, and manage your trucking trips with pickup
                     and dropoff locations.
                   </p>
@@ -43,7 +43,7 @@ const HomePage = () => {
             </div>
 
             {/* ELD Compliance */}
-            <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
               <div className="p-6">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
@@ -52,13 +52,13 @@ const HomePage = () => {
                     </div>
                   </div>
                   <div className="ml-4">
-                    <h3 className="text-lg font-medium text-gray-900">
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
                       ELD Compliance
                     </h3>
                   </div>
                 </div>
                 <div className="mt-4">
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-500 dark:text-gray-300">
                     Generate daily logs and ensure compliance with federal ELD
                     regulations.
                   </p>
@@ -67,7 +67,7 @@ const HomePage = () => {
             </div>
 
             {/* Route Optimization */}
-            <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
               <div className="p-6">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
@@ -76,13 +76,13 @@ const HomePage = () => {
                     </div>
                   </div>
                   <div className="ml-4">
-                    <h3 className="text-lg font-medium text-gray-900">
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
                       Route Optimization
                     </h3>
                   </div>
                 </div>
                 <div className="mt-4">
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-500 dark:text-gray-300">
                     Calculate optimal routes with rest breaks, fuel stops, and
                     compliance checks.
                   </p>
@@ -120,22 +120,22 @@ const HomePage = () => {
 
         {/* Quick Stats */}
         <div className="mt-20">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
               Quick Stats
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-blue-600">11</div>
-                <div className="text-sm text-gray-500">Hour Driving Limit</div>
+                <div className="text-sm text-gray-500 dark:text-gray-300">Hour Driving Limit</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-green-600">10</div>
-                <div className="text-sm text-gray-500">Hour Break Required</div>
+                <div className="text-sm text-gray-500 dark:text-gray-300">Hour Break Required</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-purple-600">30</div>
-                <div className="text-sm text-gray-500">Min Rest Break</div>
+                <div className="text-sm text-gray-500 dark:text-gray-300">Min Rest Break</div>
               </div>
             </div>
           </div>
