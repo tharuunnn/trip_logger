@@ -12,6 +12,29 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Theme variables for charts/maps */
+:root {
+  --surface: #ffffff;
+  --surface-muted: #f3f4f6; /* gray-100 */
+  --border: #e5e7eb; /* gray-200 */
+  --text: #111827; /* gray-900 */
+  --text-muted: #6b7280; /* gray-500 */
+  --grid-subtle: #f3f4f6; /* light grid */
+  --grid-strong: #e5e7eb;
+  --card-overlay: rgba(255, 255, 255, 0.8);
+}
+
+.dark {
+  --surface: #1f2937; /* gray-800 */
+  --surface-muted: #111827; /* gray-900 */
+  --border: #374151; /* gray-700 */
+  --text: #e5e7eb; /* gray-200 */
+  --text-muted: #cbd5e1; /* slate-300 */
+  --grid-subtle: #1f2937; /* dark grid */
+  --grid-strong: #374151;
+  --card-overlay: rgba(17, 24, 39, 0.8); /* gray-900/80 */
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

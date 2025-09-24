@@ -68,9 +68,8 @@ const TripFormPage = () => {
 
         console.log("Frontend GPS coordinates:", latitude, longitude);
 
-        const { current_location: _, ...rest } = formData;
         const payload = {
-          ...rest,
+          ...formData,
           current_location: {
             lat: latitude,
             lon: longitude,
@@ -98,20 +97,20 @@ const TripFormPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             Create New Trip
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-gray-600 dark:text-gray-300">
             Enter trip details to get started with route planning
           </p>
         </div>
 
         {/* Form */}
-        <div className="bg-white rounded-xl shadow-lg p-8">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
               <div className="flex">
@@ -142,7 +141,7 @@ const TripFormPage = () => {
               <div className="md:col-span-2">
                 <label
                   htmlFor="driver_name"
-                  className="block text-sm font-semibold text-gray-700 mb-2"
+                  className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"
                 >
                   Driver Name *
                 </label>
@@ -152,7 +151,7 @@ const TripFormPage = () => {
                   name="driver_name"
                   value={formData.driver_name}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 ${
                     hasFieldError(validationErrors, "driver_name")
                       ? "border-red-500 focus:ring-red-500 bg-red-50"
                       : "border-gray-300 hover:border-gray-400"
@@ -182,7 +181,7 @@ const TripFormPage = () => {
               <div>
                 <label
                   htmlFor="pickup_location"
-                  className="block text-sm font-semibold text-gray-700 mb-2"
+                  className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"
                 >
                   Pickup Location *
                 </label>
@@ -192,7 +191,7 @@ const TripFormPage = () => {
                   name="pickup_location"
                   value={formData.pickup_location}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 ${
                     hasFieldError(validationErrors, "pickup_location")
                       ? "border-red-500 focus:ring-red-500 bg-red-50"
                       : "border-gray-300 hover:border-gray-400"
@@ -202,7 +201,7 @@ const TripFormPage = () => {
                 />
 
                 {/* Example hint */}
-                <p className="mt-1 text-xs text-gray-500">
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                   Example: Los Angeles, California, USA
                 </p>
 
@@ -228,7 +227,7 @@ const TripFormPage = () => {
               <div>
                 <label
                   htmlFor="dropoff_location"
-                  className="block text-sm font-semibold text-gray-700 mb-2"
+                  className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"
                 >
                   Dropoff Location *
                 </label>
@@ -238,7 +237,7 @@ const TripFormPage = () => {
                   name="dropoff_location"
                   value={formData.dropoff_location}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 ${
                     hasFieldError(validationErrors, "dropoff_location")
                       ? "border-red-500 focus:ring-red-500 bg-red-50"
                       : "border-gray-300 hover:border-gray-400"
@@ -268,7 +267,7 @@ const TripFormPage = () => {
               <div>
                 <label
                   htmlFor="start_time"
-                  className="block text-sm font-semibold text-gray-700 mb-2"
+                  className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"
                 >
                   Start Time *
                 </label>
@@ -278,7 +277,7 @@ const TripFormPage = () => {
                   name="start_time"
                   value={formData.start_time}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 ${
                     hasFieldError(validationErrors, "start_time")
                       ? "border-red-500 focus:ring-red-500 bg-red-50"
                       : "border-gray-300 hover:border-gray-400"
@@ -307,7 +306,7 @@ const TripFormPage = () => {
               <div>
                 <label
                   htmlFor="cycle_used_hours"
-                  className="block text-sm font-semibold text-gray-700 mb-2"
+                  className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"
                 >
                   Cycle Used Hours *
                 </label>
@@ -321,7 +320,7 @@ const TripFormPage = () => {
                     min="0"
                     max="70"
                     step="0.1"
-                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 ${
                       hasFieldError(validationErrors, "cycle_used_hours")
                         ? "border-red-500 focus:ring-red-500 bg-red-50"
                         : "border-gray-300 hover:border-gray-400"
@@ -330,7 +329,7 @@ const TripFormPage = () => {
                     required
                   />
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                    <span className="text-gray-500 text-sm">hours</span>
+                    <span className="text-gray-500 dark:text-gray-400 text-sm">hours</span>
                   </div>
                 </div>
                 {hasFieldError(validationErrors, "cycle_used_hours") && (
@@ -349,7 +348,7 @@ const TripFormPage = () => {
                     {getFieldError(validationErrors, "cycle_used_hours")}
                   </p>
                 )}
-                <p className="mt-1 text-xs text-gray-500">
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                   Hours already used in current 70-hour cycle (ELD limit: 70
                   hours)
                 </p>
@@ -357,11 +356,11 @@ const TripFormPage = () => {
             </div>
 
             {/* Form Actions */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
+            <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
               <button
                 type="button"
                 onClick={() => navigate("/trips")}
-                className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+                className="flex-1 px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
               >
                 Cancel
               </button>

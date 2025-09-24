@@ -18,6 +18,8 @@ from django.conf import settings
 from django.utils.decorators import method_decorator
 import logging
 import openrouteservice
+from django.utils import timezone
+from .models import DailyLog, LogEntry, Trip
 
 
 
@@ -470,3 +472,99 @@ def simplify_coordinates(coords: list, tolerance: float = 0.0005) -> list:
         # fallback: naive sampling (pick every Nth point)
         n = max(1, len(coords) // 1000)  # limit to ~1000 points
         return coords[::n]
+
+
+def compute_cycle_remaining(trip_id: int, as_of: Optional[datetime] = None) -> Dict:
+    """
+    Compute rolling 70-hour/8-day cycle hours for a trip with a simple 34-hour restart heuristic.
+
+    - On-duty = Driving + On duty not driving
+    - Off-duty = Off duty + Sleeper berth
+    - Rolling window = last 8 consecutive calendar days including 'as_of' date
+    - 34-hour reset: if there is a contiguous off-duty-only period >= 34 hours ending before/as_of,
+      the cycle is considered reset after that break; we then only sum on-duty since that reset
+
+    Returns a dict with used/remaining hours and window metadata.
+    """
+    if as_of is None:
+        as_of = timezone.now()
+
+    try:
+        trip = Trip.objects.get(pk=trip_id)
+    except Trip.DoesNotExist:
+        return {"error": f"Trip {trip_id} not found"}
+
+    as_of_date = as_of.date()
+    window_start = as_of_date - timedelta(days=7)  # 8-day window inclusive
+
+    # Fetch logs in window and a bit earlier to detect 34-hour reset
+    lookback_start = as_of_date - timedelta(days=10)
+    logs_qs = (
+        DailyLog.objects.filter(trip=trip, day__gte=lookback_start, day__lte=as_of_date)
+        .order_by("day")
+        .prefetch_related("entries")
+    )
+
+    # Build per-day totals from entries (do not rely on rollup fields)
+    day_data: Dict[str, Dict[str, float]] = {}
+    for dl in logs_qs:
+        on_duty = 0.0
+        off_duty = 0.0
+        for e in dl.entries.all():
+            dur = float(e.duration_hours)
+            if e.status in ("driving", "on_duty_not_driving"):
+                on_duty += dur
+            elif e.status in ("off_duty", "sleeper_berth"):
+                off_duty += dur
+        day_data[str(dl.day)] = {"on": on_duty, "off": off_duty}
+
+    # Heuristic 34-hour restart detection: find any contiguous sequence of days with no on-duty
+    # activity whose total off >= 34h. If found, reset cycle after that period.
+    restart_detected = False
+    restart_after_day: Optional[datetime.date] = None
+    current_off_sum = 0.0
+    current_seq_days: List[datetime.date] = []
+    # Iterate chronologically
+    day_cursor = lookback_start
+    while day_cursor <= as_of_date:
+        key = str(day_cursor)
+        on = day_data.get(key, {}).get("on", 0.0)
+        off = day_data.get(key, {}).get("off", 0.0)
+        if on <= 1e-6:  # treat as off-duty-only day
+            current_off_sum += off
+            current_seq_days.append(day_cursor)
+        else:
+            current_off_sum = 0.0
+            current_seq_days = []
+
+        if current_off_sum >= 34.0:
+            restart_detected = True
+            restart_after_day = day_cursor
+            # don't break; keep latest restart
+        day_cursor += timedelta(days=1)
+
+    # Compute rolling on-duty used in window, respecting restart
+    used_hours = 0.0
+    sum_start = window_start
+    if restart_detected and restart_after_day and restart_after_day >= window_start:
+        # Reset after the off-duty block; start sum from next day
+        sum_start = restart_after_day + timedelta(days=1)
+
+    day_cursor = sum_start
+    while day_cursor <= as_of_date:
+        key = str(day_cursor)
+        used_hours += day_data.get(key, {}).get("on", 0.0)
+        day_cursor += timedelta(days=1)
+
+    remaining = max(0.0, 70.0 - used_hours)
+
+    return {
+        "trip_id": trip_id,
+        "cycle": "70_8",
+        "window_start": str(sum_start),
+        "window_end": str(as_of_date),
+        "used_hours": round(used_hours, 2),
+        "remaining_hours": round(remaining, 2),
+        "restart_detected": restart_detected,
+        "restart_end_day": str(restart_after_day) if restart_after_day else None,
+    }

@@ -86,15 +86,15 @@ const LogsVisualization: React.FC<LogsVisualizationProps> = ({ logs }) => {
   );
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
         Daily Logs Visualization
       </h3>
 
       {logs.length === 0 ? (
         <div className="text-center py-8">
           <div className="text-gray-400 text-4xl mb-2">📊</div>
-          <p className="text-gray-600">No logs to visualize</p>
+          <p className="text-gray-600 dark:text-gray-300">No logs to visualize</p>
         </div>
       ) : (
         <div className="space-y-6">
@@ -106,10 +106,10 @@ const LogsVisualization: React.FC<LogsVisualizationProps> = ({ logs }) => {
                   className="w-4 h-4 rounded-full mx-auto mb-2"
                   style={{ backgroundColor: getStatusColor(status) }}
                 ></div>
-                <div className="text-sm font-medium text-gray-900">
+                <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                   {getStatusLabel(status)}
                 </div>
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-gray-500 dark:text-gray-300">
                   {data.hours.toFixed(1)}h ({data.count} logs)
                 </div>
               </div>
@@ -118,7 +118,7 @@ const LogsVisualization: React.FC<LogsVisualizationProps> = ({ logs }) => {
 
           {/* ELD-style timeline (SVG with axes and step line) */}
           <div className="space-y-4">
-            <h4 className="font-medium text-gray-900">Timeline</h4>
+            <h4 className="font-medium text-gray-900 dark:text-gray-100">Timeline</h4>
             <div className="space-y-3">
               {normalizedLogs.map((log) => {
                 const entries = (log.entries || []).map((e) => ({
@@ -214,10 +214,10 @@ const LogsVisualization: React.FC<LogsVisualizationProps> = ({ logs }) => {
                 }
 
                 return (
-                  <div key={log.id} className="border rounded-lg p-4">
+                  <div key={log.id} className="border border-[color:var(--border)] rounded-lg p-4" style={{ background: 'var(--surface)' }}>
                     <div className="flex justify-between items-center mb-3">
                       <div>
-                        <h5 className="font-medium text-gray-900">
+                        <h5 className="font-medium text-gray-900 dark:text-gray-100">
                           {new Date(log.day).toLocaleDateString("en-US", {
                             weekday: "short",
                             month: "short",
@@ -225,12 +225,13 @@ const LogsVisualization: React.FC<LogsVisualizationProps> = ({ logs }) => {
                           })}
                         </h5>
                       </div>
-                      <div className="text-sm text-gray-500">Log #{log.id}</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-300">Log #{log.id}</div>
                     </div>
                     <svg
                       width="100%"
                       viewBox={`0 0 ${width} ${height}`}
                       className="rounded-md border"
+                      style={{ background: 'var(--surface-muted)', borderColor: 'var(--border)' }}
                     >
                       {/* Y labels */}
                       {lanes.map((lane, i) => (
@@ -239,7 +240,7 @@ const LogsVisualization: React.FC<LogsVisualizationProps> = ({ logs }) => {
                           x={8}
                           y={topPad + rowH * (i + 0.6)}
                           fontSize="12"
-                          fill="#374151"
+                          fill="var(--text-muted)"
                         >
                           {lane.label}
                         </text>
@@ -252,7 +253,7 @@ const LogsVisualization: React.FC<LogsVisualizationProps> = ({ logs }) => {
                           y1={topPad}
                           x2={xForQuarter(i)}
                           y2={height - 12}
-                          stroke="#f3f4f6"
+                          stroke="var(--grid-subtle)"
                           strokeWidth={1}
                         />
                       ))}
@@ -264,7 +265,7 @@ const LogsVisualization: React.FC<LogsVisualizationProps> = ({ logs }) => {
                             y1={topPad}
                             x2={xForHour(i)}
                             y2={height - 12}
-                            stroke="#e5e7eb"
+                            stroke="var(--grid-strong)"
                             strokeWidth={i % 6 === 0 ? 2 : 1}
                           />
                           <text
@@ -272,7 +273,7 @@ const LogsVisualization: React.FC<LogsVisualizationProps> = ({ logs }) => {
                             y={height - 2}
                             fontSize="10"
                             textAnchor="middle"
-                            fill="#6b7280"
+                            fill="var(--text-muted)"
                           >
                             {formatHour12(i)}
                           </text>
@@ -286,7 +287,7 @@ const LogsVisualization: React.FC<LogsVisualizationProps> = ({ logs }) => {
                           y1={topPad + rowH * (i + 1)}
                           x2={width - 12}
                           y2={topPad + rowH * (i + 1)}
-                          stroke="#d1d5db"
+                          stroke="var(--grid-strong)"
                           strokeWidth={1}
                         />
                       ))}

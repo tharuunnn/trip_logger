@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import LogsVisualization from "../components/LogsVisualization";
 import RouteMap from "../components/RouteMapRL";
+import BreaksPanel from "../components/BreaksPanel";
 import { useRefresh } from "../hooks/useRefresh";
 import { tripAPI } from "../services/api";
 interface Trip {
@@ -33,17 +34,31 @@ const TripDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [calculatingRoute, setCalculatingRoute] = useState(false);
+  const [cycleInfo, setCycleInfo] = useState<
+    | {
+        used_hours: number;
+        remaining_hours: number;
+        window_start: string;
+        window_end: string;
+        restart_detected: boolean;
+        restart_end_day?: string | null;
+      }
+    | null
+  >(null);
   // Minimal route data typing to avoid 'any' while allowing flexible shape
-  const [routeData, setRouteData] = useState<{
-    route?: {
-      total_distance?: number | string;
-      total_driving_time?: number | string;
-      total_trip_time?: number | string;
-      stops?: { description: string; duration: number }[];
-      segments?: { coordinates?: [number, number][] }[];
-      combined_coordinates?: [number, number][];
-    };
-  } | null>(null);
+  const [routeData, setRouteData] = useState<
+    | {
+        route?: {
+          total_distance?: number | string;
+          total_driving_time?: number | string;
+          total_trip_time?: number | string;
+          stops?: { description: string; duration: number }[];
+          segments?: { coordinates?: [number, number][] }[];
+          combined_coordinates?: [number, number][];
+        };
+      }
+    | null
+  >(null);
   const [currentLocation, setCurrentLocation] = useState<
     { lat: number; lon: number; address: string } | undefined
   >(undefined);
@@ -78,6 +93,7 @@ const TripDetailPage = () => {
     if (id) {
       fetchTripDetails();
       fetchTripLogs();
+      fetchCycleRemaining();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, refreshKey]);
@@ -116,6 +132,15 @@ const TripDetailPage = () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error("Error fetching logs:", err);
+    }
+  };
+
+  const fetchCycleRemaining = async () => {
+    try {
+      const response = await tripAPI.cycleRemaining(parseInt(id!));
+      setCycleInfo(response.data);
+    } catch (err) {
+      console.warn("Failed to fetch cycle remaining", err);
     }
   };
 
@@ -283,7 +308,7 @@ const TripDetailPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
@@ -294,23 +319,34 @@ const TripDetailPage = () => {
             >
               ← Back to Trips
             </Link>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
               Trip #{trip.id}
             </h1>
-            <p className="text-gray-600">Driver: {trip.driver_name}</p>
+            <p className="text-gray-600 dark:text-gray-300">Driver: {trip.driver_name}</p>
           </div>
           <div className="flex space-x-3">
             <button
               onClick={calculateRoute}
               disabled={calculatingRoute}
-              className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-md shadow hover:from-purple-700 hover:to-indigo-700 transition disabled:opacity-60"
             >
-              {calculatingRoute ? "Calculating..." : "Calculate Route"}
+              {calculatingRoute ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>
+                  Calculating...
+                </>
+              ) : (
+                <>
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 20l-5.447-2.724A2 2 0 013 15.382V8.618a2 2 0 011.553-1.894L9 4m6 16l5.447-2.724A2 2 0 0021 15.382V8.618a2 2 0 00-1.553-1.894L15 4M9 4l6 16M9 4l6 16"/></svg>
+                  Calculate Route
+                </>
+              )}
             </button>
             <Link
               to={`/trips/${trip.id}/logs/new`}
-              className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors"
+              className="inline-flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-md shadow hover:bg-emerald-700 transition"
             >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/></svg>
               Add to Log
             </Link>
           </div>
@@ -319,42 +355,42 @@ const TripDetailPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Trip Details */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
                 Trip Information
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-500">
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
                     Pickup Location
                   </label>
-                  <p className="text-gray-900">{trip.pickup_location}</p>
+                  <p className="text-gray-900 dark:text-gray-100">{trip.pickup_location}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
                     Dropoff Location
                   </label>
-                  <p className="text-gray-900">{trip.dropoff_location}</p>
+                  <p className="text-gray-900 dark:text-gray-100">{trip.dropoff_location}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
                     Start Time
                   </label>
-                  <p className="text-gray-900">{formatDate(trip.start_time)}</p>
+                  <p className="text-gray-900 dark:text-gray-100">{formatDate(trip.start_time)}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
                     Cycle Used Hours
                   </label>
-                  <p className="text-gray-900">{trip.cycle_used_hours} hours</p>
+                  <p className="text-gray-900 dark:text-gray-100">{trip.cycle_used_hours} hours</p>
                 </div>
               </div>
             </div>
 
             {/* Route Calculation Results */}
             {routeData && (
-              <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
                   Route Calculation
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -362,7 +398,7 @@ const TripDetailPage = () => {
                     <div className="text-2xl font-bold text-blue-600">
                       {routeData?.route?.total_distance ?? "--"}
                     </div>
-                    <div className="text-sm text-gray-500">
+                    <div className="text-sm text-gray-500 dark:text-gray-300">
                       Total Distance (miles)
                     </div>
                   </div>
@@ -370,7 +406,7 @@ const TripDetailPage = () => {
                     <div className="text-2xl font-bold text-green-600">
                       {routeData?.route?.total_driving_time ?? "--"}
                     </div>
-                    <div className="text-sm text-gray-500">
+                    <div className="text-sm text-gray-500 dark:text-gray-300">
                       Driving Time (hours)
                     </div>
                   </div>
@@ -378,40 +414,11 @@ const TripDetailPage = () => {
                     <div className="text-2xl font-bold text-purple-600">
                       {routeData?.route?.total_trip_time ?? "--"}
                     </div>
-                    <div className="text-sm text-gray-500">
+                    <div className="text-sm text-gray-500 dark:text-gray-300">
                       Total Time (hours)
                     </div>
                   </div>
                 </div>
-
-                {routeData?.route?.stops &&
-                  routeData.route.stops.length > 0 && (
-                    <div>
-                      <h3 className="font-medium text-gray-900 mb-2">
-                        Required Stops
-                      </h3>
-                      <div className="space-y-2">
-                        {routeData.route.stops.map(
-                          (
-                            stop: { description: string; duration: number },
-                            index: number
-                          ) => (
-                            <div
-                              key={index}
-                              className="flex items-center justify-between bg-gray-50 p-3 rounded"
-                            >
-                              <span className="text-sm">
-                                {stop.description}
-                              </span>
-                              <span className="text-sm font-medium">
-                                {stop.duration}h
-                              </span>
-                            </div>
-                          )
-                        )}
-                      </div>
-                    </div>
-                  )}
               </div>
             )}
 
@@ -458,31 +465,52 @@ const TripDetailPage = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Trip Stats */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="font-semibold text-gray-900 mb-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">
                 Trip Statistics
               </h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Created:</span>
-                  <span className="font-medium">
+                  <span className="text-gray-600 dark:text-gray-300">Created:</span>
+                  <span className="font-medium dark:text-gray-100">
                     {formatDate(trip.created_at)}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Driver:</span>
-                  <span className="font-medium">{trip.driver_name}</span>
+                  <span className="text-gray-600 dark:text-gray-300">Driver:</span>
+                  <span className="font-medium dark:text-gray-100">{trip.driver_name}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Cycle Used:</span>
-                  <span className="font-medium">{trip.cycle_used_hours}h</span>
+                  <span className="text-gray-600 dark:text-gray-300">Cycle Used:</span>
+                  <span className="font-medium dark:text-gray-100">{trip.cycle_used_hours}h</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Logs:</span>
-                  <span className="font-medium">{logs.length}</span>
+                  <span className="text-gray-600 dark:text-gray-300">Logs:</span>
+                  <span className="font-medium dark:text-gray-100">{logs.length}</span>
                 </div>
+                {cycleInfo && (
+                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-300">Cycle Remaining (70/8):</span>
+                      <span className="font-semibold text-emerald-600 dark:text-emerald-400">{cycleInfo.remaining_hours.toFixed(1)}h</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-300">Cycle Used:</span>
+                      <span className="font-medium dark:text-gray-100">{cycleInfo.used_hours.toFixed(1)}h</span>
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                      Window: {new Date(cycleInfo.window_start).toLocaleDateString()} → {new Date(cycleInfo.window_end).toLocaleDateString()}
+                    </div>
+                    {cycleInfo.restart_detected && (
+                      <div className="text-xs text-blue-600 dark:text-blue-300">34-hour restart detected (ended {cycleInfo.restart_end_day})</div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
+
+            {/* Breaks and enforcement */}
+            <BreaksPanel tripId={trip.id} stops={routeData?.route?.stops as any} />
           </div>
         </div>
       </div>

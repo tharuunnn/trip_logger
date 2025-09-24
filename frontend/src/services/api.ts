@@ -56,6 +56,9 @@ export const tripAPI = {
       current_location: currentLocation,
     }),
 
+  // Get dynamic cycle remaining for a trip
+  cycleRemaining: (id: number) => api.get(`/trips/${id}/cycle_remaining/`),
+
   // Get trip logs
   getTripLogs: (id: number) => api.get(`/trips/${id}/logs/`),
 };

@@ -7,7 +7,7 @@ from rest_framework.permissions import AllowAny
 from django_ratelimit.decorators import ratelimit
 from .models import Trip, DailyLog, LogEntry
 from .serializers import TripSerializer, TripDetailSerializer, DailyLogSerializer, LogEntrySerializer
-from .utils import calculate_trip_route, generate_daily_logs, calculate_eld_compliance, geocode_address
+from .utils import calculate_trip_route, generate_daily_logs, calculate_eld_compliance, geocode_address, compute_cycle_remaining
 from django.utils.decorators import method_decorator
 from django.utils import timezone
 from rest_framework import serializers
@@ -110,6 +110,19 @@ class TripViewSet(viewsets.ModelViewSet): # model viewset provides all the CRUD 
             return Response({
                 'error': f'Route calculation failed: {str(e)}',
                 'trip_id': trip.id
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=True, methods=['get'])
+    def cycle_remaining(self, request, pk=None):
+        """Return rolling 70-hour/8-day cycle remaining (with 34-hour reset if detected)."""
+        try:
+            data = compute_cycle_remaining(int(pk))
+            if 'error' in data:
+                return Response(data, status=status.HTTP_404_NOT_FOUND)
+            return Response(data)
+        except Exception as e:
+            return Response({
+                'error': f'Failed to compute cycle remaining: {e}'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
