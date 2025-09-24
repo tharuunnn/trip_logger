@@ -426,7 +426,7 @@ const TripDetailPage = () => {
             <LogsVisualization logs={logs} />
 
             {/* Route Map */}
-            <div className="relative">
+            <div className="relative mt-6">
               {calculatingRoute && (
                 <div className="absolute inset-0 z-10 bg-white/70 flex items-center justify-center">
                   <div className="flex items-center space-x-2 text-gray-700">
@@ -510,7 +510,7 @@ const TripDetailPage = () => {
             </div>
 
             {/* Breaks and enforcement */}
-            <BreaksPanel tripId={trip.id} stops={routeData?.route?.stops as any} />
+            <BreaksPanel tripId={trip.id} />
           </div>
         </div>
       </div>
