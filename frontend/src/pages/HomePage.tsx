@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 const HomePage = () => {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-transparent">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero Section */}
         <div className="text-center">
@@ -19,11 +19,11 @@ const HomePage = () => {
         <div className="mt-20">
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {/* Trip Management */}
-            <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+            <div className="bg-white dark:bg-neutral-900 overflow-hidden shadow rounded-lg">
               <div className="p-6">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
+                    <div className="w-8 h-8 bg-violet-500 rounded-md flex items-center justify-center">
                       <span className="text-white text-sm font-bold">🚛</span>
                     </div>
                   </div>
@@ -43,7 +43,7 @@ const HomePage = () => {
             </div>
 
             {/* ELD Compliance */}
-            <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+            <div className="bg-white dark:bg-neutral-900 overflow-hidden shadow rounded-lg">
               <div className="p-6">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
@@ -67,7 +67,7 @@ const HomePage = () => {
             </div>
 
             {/* Route Optimization */}
-            <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+            <div className="bg-white dark:bg-neutral-900 overflow-hidden shadow rounded-lg">
               <div className="p-6">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
@@ -94,23 +94,23 @@ const HomePage = () => {
 
         {/* Call to Action */}
         <div className="mt-20 text-center">
-          <div className="bg-blue-600 rounded-lg shadow-lg p-8">
+          <div className="bg-neutral-900 dark:bg-neutral-900 rounded-lg shadow-lg p-8">
             <h2 className="text-2xl font-bold text-white mb-4">
               Ready to Start Your Trip?
             </h2>
-            <p className="text-blue-100 mb-6">
+            <p className="text-neutral-300 mb-6">
               Create your first trip and let our system handle the rest.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 to="/trips"
-                className="bg-white text-blue-600 px-6 py-3 rounded-md font-medium hover:bg-gray-100 transition-colors"
+                className="bg-white text-neutral-900 px-6 py-3 rounded-md font-medium hover:bg-neutral-100 transition-colors dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800 border border-neutral-200 dark:border-neutral-800"
               >
                 View All Trips
               </Link>
               <Link
                 to="/trips/new"
-                className="bg-blue-500 text-white px-6 py-3 rounded-md font-medium hover:bg-blue-400 transition-colors"
+                className="px-6 py-3 rounded-md font-medium text-white bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-500/90 hover:to-violet-700/90 shadow-sm"
               >
                 Create New Trip
               </Link>
@@ -120,7 +120,7 @@ const HomePage = () => {
 
         {/* Quick Stats */}
         <div className="mt-20">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <div className="bg-white dark:bg-neutral-900 rounded-lg shadow p-6">
             <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
               Quick Stats
             </h3>

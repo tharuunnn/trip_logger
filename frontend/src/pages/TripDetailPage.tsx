@@ -298,7 +298,7 @@ const TripDetailPage = () => {
           <p className="text-gray-600 mb-4">{error || "Trip not found"}</p>
           <Link
             to="/trips"
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+            className="px-4 py-2 rounded-md text-white bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-500/90 hover:to-violet-700/90 transition-colors"
           >
             Back to Trips
           </Link>
@@ -308,14 +308,14 @@ const TripDetailPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-transparent">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
             <Link
               to="/trips"
-              className="text-blue-600 hover:text-blue-800 mb-2 inline-block"
+              className="text-violet-600 hover:text-violet-800 mb-2 inline-block"
             >
               ← Back to Trips
             </Link>
@@ -355,7 +355,7 @@ const TripDetailPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Trip Details */}
           <div className="lg:col-span-2">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+            <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-md p-6 mb-6">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
                 Trip Information
               </h2>
@@ -378,18 +378,12 @@ const TripDetailPage = () => {
                   </label>
                   <p className="text-gray-900 dark:text-gray-100">{formatDate(trip.start_time)}</p>
                 </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                    Cycle Used Hours
-                  </label>
-                  <p className="text-gray-900 dark:text-gray-100">{trip.cycle_used_hours} hours</p>
-                </div>
               </div>
             </div>
 
             {/* Route Calculation Results */}
             {routeData && (
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+              <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-md p-6 mb-6">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
                   Route Calculation
                 </h2>
@@ -465,7 +459,7 @@ const TripDetailPage = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Trip Stats */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-md p-6">
               <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">
                 Trip Statistics
               </h3>
@@ -489,7 +483,7 @@ const TripDetailPage = () => {
                   <span className="font-medium dark:text-gray-100">{logs.length}</span>
                 </div>
                 {cycleInfo && (
-                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-neutral-800 space-y-2">
                     <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-300">Cycle Remaining (70/8):</span>
                       <span className="font-semibold text-emerald-600 dark:text-emerald-400">{cycleInfo.remaining_hours.toFixed(1)}h</span>

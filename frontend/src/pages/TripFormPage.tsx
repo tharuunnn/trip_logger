@@ -97,7 +97,7 @@ const TripFormPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-transparent">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="text-center mb-8">
@@ -110,7 +110,7 @@ const TripFormPage = () => {
         </div>
 
         {/* Form */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
+        <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-lg p-8">
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
               <div className="flex">
@@ -151,7 +151,7 @@ const TripFormPage = () => {
                   name="driver_name"
                   value={formData.driver_name}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 ${
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-colors dark:bg-neutral-900 dark:border-neutral-800 dark:text-gray-100 ${
                     hasFieldError(validationErrors, "driver_name")
                       ? "border-red-500 focus:ring-red-500 bg-red-50"
                       : "border-gray-300 hover:border-gray-400"
@@ -191,7 +191,7 @@ const TripFormPage = () => {
                   name="pickup_location"
                   value={formData.pickup_location}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 ${
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-colors dark:bg-neutral-900 dark:border-neutral-800 dark:text-gray-100 ${
                     hasFieldError(validationErrors, "pickup_location")
                       ? "border-red-500 focus:ring-red-500 bg-red-50"
                       : "border-gray-300 hover:border-gray-400"
@@ -237,7 +237,7 @@ const TripFormPage = () => {
                   name="dropoff_location"
                   value={formData.dropoff_location}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 ${
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-colors dark:bg-neutral-900 dark:border-neutral-800 dark:text-gray-100 ${
                     hasFieldError(validationErrors, "dropoff_location")
                       ? "border-red-500 focus:ring-red-500 bg-red-50"
                       : "border-gray-300 hover:border-gray-400"
@@ -277,7 +277,7 @@ const TripFormPage = () => {
                   name="start_time"
                   value={formData.start_time}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 ${
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-colors dark:bg-neutral-900 dark:border-neutral-800 dark:text-gray-100 ${
                     hasFieldError(validationErrors, "start_time")
                       ? "border-red-500 focus:ring-red-500 bg-red-50"
                       : "border-gray-300 hover:border-gray-400"
@@ -320,7 +320,7 @@ const TripFormPage = () => {
                     min="0"
                     max="70"
                     step="0.1"
-                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 ${
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-colors dark:bg-neutral-900 dark:border-neutral-800 dark:text-gray-100 ${
                       hasFieldError(validationErrors, "cycle_used_hours")
                         ? "border-red-500 focus:ring-red-500 bg-red-50"
                         : "border-gray-300 hover:border-gray-400"
@@ -356,18 +356,18 @@ const TripFormPage = () => {
             </div>
 
             {/* Form Actions */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200 dark:border-neutral-800">
               <button
                 type="button"
                 onClick={() => navigate("/trips")}
-                className="flex-1 px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+                className="flex-1 px-6 py-3 border border-gray-300 dark:border-neutral-800 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-50 dark:hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+                className="flex-1 px-6 py-3 rounded-lg text-white bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-500/90 hover:to-violet-700/90 focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
               >
                 {loading ? (
                   <>

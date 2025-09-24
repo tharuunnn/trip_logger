@@ -4,10 +4,16 @@ import { useTheme } from '../contexts/ThemeContext';
 const DarkModeToggle: React.FC = () => {
   const { isDarkMode, toggleDarkMode } = useTheme();
 
+  const handleToggle = () => {
+    console.log('[DarkModeToggle] Before toggle:', isDarkMode);
+    toggleDarkMode();
+    console.log('[DarkModeToggle] After toggle called');
+  };
+
   return (
     <button
-      onClick={toggleDarkMode}
-      className="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200 border border-gray-300 dark:border-gray-600"
+      onClick={handleToggle}
+      className="p-2 rounded-lg bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors duration-200 border border-neutral-300 dark:border-neutral-600"
       aria-label="Toggle dark mode"
       title={isDarkMode ? "Switch to light" : "Switch to dark"}
     >

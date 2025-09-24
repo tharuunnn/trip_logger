@@ -1,6 +1,16 @@
 /* Leaflet CSS */
 @import "leaflet/dist/leaflet.css";
+
+/* Tailwind CSS (v4 with @tailwindcss/vite) */
 @import "tailwindcss";
+
+/* Tailwind v4 configuration */
+@theme {
+  --default-transition-duration: 200ms;
+}
+
+/* Enable class-based dark mode */
+@variant dark (.dark &);
 
 /* Custom styles for Trip Logger */
 body {

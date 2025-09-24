@@ -21,29 +21,19 @@ interface ThemeProviderProps {
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    // Check localStorage for saved theme preference
+    // Persisted preference takes precedence
     const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-      return savedTheme === 'dark';
-    }
-    // Check system preference
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (savedTheme === 'dark') return true;
+    if (savedTheme === 'light') return false;
+    // Default to light if no prior choice
+    return false;
   });
 
   // Apply the 'dark' class before paint to avoid flicker and ensure global toggle
   useLayoutEffect(() => {
     const el = document.documentElement;
-    // Normalize classes first
-    el.classList.remove('dark');
-    el.classList.remove('light');
-
-    if (isDarkMode) {
-      el.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      el.classList.add('light');
-      localStorage.setItem('theme', 'light');
-    }
+    el.classList.toggle('dark', isDarkMode);
+    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
     // Debug: verify class on <html>
     // eslint-disable-next-line no-console
     console.log('[Theme] dark=', isDarkMode, 'classes=', document.documentElement.className);

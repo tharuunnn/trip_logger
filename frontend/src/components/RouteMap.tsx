@@ -243,7 +243,7 @@ const RouteMap: React.FC<RouteMapProps> = ({
           console.warn("Centering on first coord failed", e);
         }
         routeLayerRef.current = L.polyline(allCoords, {
-          color: "blue",
+          color: "#7c3aed",
           weight: 4,
         }).addTo(map);
 
@@ -275,12 +275,12 @@ const RouteMap: React.FC<RouteMapProps> = ({
 
   if (!routeData) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Route Map</h3>
-        <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
+      <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-md p-6">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-neutral-100 mb-4">Route Map</h3>
+        <div className="h-64 bg-gray-100 dark:bg-neutral-800 rounded-lg flex items-center justify-center">
           <div className="text-center">
             <div className="text-gray-400 text-4xl mb-2">🗺️</div>
-            <p className="text-gray-600">Calculate route to see map</p>
+            <p className="text-gray-600 dark:text-neutral-300">Calculate route to see map</p>
           </div>
         </div>
       </div>
@@ -288,33 +288,33 @@ const RouteMap: React.FC<RouteMapProps> = ({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Route Map</h3>
+    <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-md p-6">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-neutral-100 mb-4">Route Map</h3>
 
       {/* Route Summary */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-        <div className="text-center bg-blue-50 rounded-lg p-3">
-          <div className="text-2xl font-bold text-blue-600">
+        <div className="text-center bg-neutral-100 dark:bg-neutral-800 rounded-lg p-3">
+          <div className="text-2xl font-bold text-violet-600">
             {routeData.route.total_distance.toFixed(2)}
           </div>
-          <div className="text-sm text-blue-800">Total Distance (miles)</div>
+          <div className="text-sm text-neutral-600 dark:text-neutral-300">Total Distance (miles)</div>
         </div>
-        <div className="text-center bg-green-50 rounded-lg p-3">
-          <div className="text-2xl font-bold text-green-600">
+        <div className="text-center bg-neutral-100 dark:bg-neutral-800 rounded-lg p-3">
+          <div className="text-2xl font-bold text-violet-600">
             {routeData.route.total_driving_time.toFixed(2)}
           </div>
-          <div className="text-sm text-green-800">Driving Time (hours)</div>
+          <div className="text-sm text-neutral-600 dark:text-neutral-300">Driving Time (hours)</div>
         </div>
-        <div className="text-center bg-purple-50 rounded-lg p-3">
-          <div className="text-2xl font-bold text-purple-600">
+        <div className="text-center bg-neutral-100 dark:bg-neutral-800 rounded-lg p-3">
+          <div className="text-2xl font-bold text-violet-600">
             {routeData.route.total_trip_time.toFixed(2)}
           </div>
-          <div className="text-sm text-purple-800">Total Time (hours)</div>
+          <div className="text-sm text-neutral-600 dark:text-neutral-300">Total Time (hours)</div>
         </div>
       </div>
 
       {/* Map Container */}
-      <div className="h-64 rounded-lg overflow-hidden border relative">
+      <div className="h-64 rounded-lg overflow-hidden border relative" style={{borderColor:'var(--border)'}}>
         <div
           ref={mapRef}
           className="w-full h-full"

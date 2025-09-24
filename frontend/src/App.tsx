@@ -12,7 +12,7 @@ function App() {
   return (
     <ThemeProvider>
       <Router>
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+        <div className="min-h-screen bg-gray-50 dark:bg-neutral-950 transition-colors duration-200">
           <Navbar />
           <Routes>
             <Route path="/" element={<HomePage />} />

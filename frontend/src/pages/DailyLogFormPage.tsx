@@ -141,13 +141,13 @@ const DailyLogFormPage = () => {
 
   if (error && !trip) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-transparent flex items-center justify-center">
         <div className="text-center">
           <div className="text-red-600 text-xl mb-4">⚠️ Error</div>
           <p className="text-gray-600 dark:text-gray-300 mb-4">{error}</p>
           <button
             onClick={() => navigate("/trips")}
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+            className="px-4 py-2 rounded-md text-white bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-500/90 hover:to-violet-700/90 transition-colors"
           >
             Back to Trips
           </button>
@@ -157,7 +157,7 @@ const DailyLogFormPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-transparent">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -169,7 +169,7 @@ const DailyLogFormPage = () => {
         </div>
 
         {/* Form */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-md p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Date */}
             <div>
@@ -186,7 +186,7 @@ const DailyLogFormPage = () => {
                 value={formData.day}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-900 dark:text-gray-100"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-neutral-800 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent dark:bg-neutral-900 dark:text-gray-100"
               />
             </div>
 
@@ -204,7 +204,7 @@ const DailyLogFormPage = () => {
                 value={formData.status}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-900 dark:text-gray-100"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-neutral-800 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent dark:bg-neutral-900 dark:text-gray-100"
               >
                 {statusOptions.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -229,7 +229,7 @@ const DailyLogFormPage = () => {
                 value={formData.start_time}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-900 dark:text-gray-100"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-neutral-800 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent dark:bg-neutral-900 dark:text-gray-100"
               />
             </div>
 
@@ -250,7 +250,7 @@ const DailyLogFormPage = () => {
                 required
                 min="0"
                 step="0.1"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-900 dark:text-gray-100"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-neutral-800 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent dark:bg-neutral-900 dark:text-gray-100"
                 placeholder="0.0"
               />
             </div>
@@ -269,7 +269,7 @@ const DailyLogFormPage = () => {
                 value={formData.remarks}
                 onChange={handleChange}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-900 dark:text-gray-100"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-neutral-800 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent dark:bg-neutral-900 dark:text-gray-100"
                 placeholder="Any additional notes or remarks..."
               />
             </div>
@@ -289,18 +289,18 @@ const DailyLogFormPage = () => {
             )}
 
             {/* Form Actions */}
-            <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-neutral-800">
               <button
                 type="button"
                 onClick={() => navigate(`/trips/${tripId}`)}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                className="px-4 py-2 border border-gray-300 dark:border-neutral-800 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-800 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-2 rounded-md text-white bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-500/90 hover:to-violet-700/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <span className="inline-flex items-center">

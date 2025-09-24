@@ -134,7 +134,7 @@ const BreaksPanel: React.FC<BreaksPanelProps> = ({ tripId }) => {
         {!breakActive ? (
           <button
             onClick={startBreak}
-            className="w-full px-3 py-2 rounded-md text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 transition"
+            className="w-full px-3 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-500/90 hover:to-violet-700/90 transition"
             disabled={!isDriving && remainingToBreak > 0}
             title={!isDriving && remainingToBreak > 0 ? "You can still take a break, but timer only matters for driving" : undefined}
           >

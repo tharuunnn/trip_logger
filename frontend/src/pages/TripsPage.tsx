@@ -55,7 +55,7 @@ const TripsPage = () => {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-500 mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-300">Loading trips...</p>
         </div>
       </div>
@@ -65,14 +65,14 @@ const TripsPage = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 max-w-md w-full mx-4">
+        <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-lg p-8 max-w-md w-full mx-4">
           <div className="text-center">
             <div className="text-red-500 text-4xl mb-4">⚠️</div>
             <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Error</h2>
             <p className="text-gray-600 dark:text-gray-300 mb-4">{error}</p>
             <button
               onClick={fetchTrips}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-4 py-2 rounded-lg text-white bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-500/90 hover:to-violet-700/90 transition-colors"
             >
               Try Again
             </button>
@@ -83,7 +83,7 @@ const TripsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-transparent">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -97,7 +97,7 @@ const TripsPage = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+          <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-lg p-6">
             <div className="flex items-center">
               <div className="p-3 bg-blue-100 dark:bg-blue-900/40 rounded-lg">
                 <svg
@@ -123,7 +123,7 @@ const TripsPage = () => {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+          <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-lg p-6">
             <div className="flex items-center">
               <div className="p-3 bg-green-100 dark:bg-green-900/40 rounded-lg">
                 <svg
@@ -155,7 +155,7 @@ const TripsPage = () => {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+          <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-lg p-6">
             <div className="flex items-center">
               <div className="p-3 bg-yellow-100 dark:bg-yellow-900/40 rounded-lg">
                 <svg
@@ -190,7 +190,7 @@ const TripsPage = () => {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+          <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-lg p-6">
             <div className="flex items-center">
               <div className="p-3 bg-purple-100 dark:bg-purple-900/40 rounded-lg">
                 <svg
@@ -226,13 +226,13 @@ const TripsPage = () => {
         </div>
 
         {/* Trips Table */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-lg overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-neutral-800">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">All Trips</h2>
               <Link
                 to="/trips/new"
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+                className="px-4 py-2 rounded-lg text-white bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-500/90 hover:to-violet-700/90 transition-colors flex items-center"
               >
                 <svg
                   className="w-5 h-5 mr-2"
@@ -263,7 +263,7 @@ const TripsPage = () => {
               </p>
               <Link
                 to="/trips/new"
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors inline-flex items-center"
+                className="px-6 py-3 rounded-lg text-white bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-500/90 hover:to-violet-700/90 transition-colors inline-flex items-center"
               >
                 <svg
                   className="w-5 h-5 mr-2"
@@ -283,8 +283,8 @@ const TripsPage = () => {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-50 dark:bg-gray-700/50">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-neutral-800">
+                <thead className="bg-gray-50 dark:bg-neutral-800/60">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Trip ID
@@ -309,11 +309,11 @@ const TripsPage = () => {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody className="bg-white dark:bg-neutral-900 divide-y divide-gray-200 dark:divide-neutral-800">
                   {trips.map((trip) => (
                     <tr
                       key={trip.id}
-                      className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                      className="hover:bg-gray-50 dark:hover:bg-neutral-800/50 transition-colors"
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -353,8 +353,8 @@ const TripsPage = () => {
                         <span
                           className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                             new Date(trip.start_time) > new Date()
-                              ? "text-blue-600 bg-blue-100 dark:text-blue-300 dark:bg-blue-900/30"
-                              : "text-green-600 bg-green-100 dark:text-green-300 dark:bg-green-900/30"
+                              ? "text-violet-700 bg-violet-100 dark:text-violet-300 dark:bg-violet-900/30"
+                              : "text-green-700 bg-green-100 dark:text-green-300 dark:bg-green-900/30"
                           }`}
                         >
                           {new Date(trip.start_time) > new Date()
@@ -365,7 +365,7 @@ const TripsPage = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <Link
                           to={`/trips/${trip.id}`}
-                          className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-4"
+                          className="text-violet-600 hover:text-violet-800 dark:text-violet-400 dark:hover:text-violet-300 mr-4"
                         >
                           View
                         </Link>
