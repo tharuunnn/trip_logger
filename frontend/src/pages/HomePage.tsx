@@ -94,11 +94,11 @@ const HomePage = () => {
 
         {/* Call to Action */}
         <div className="mt-20 text-center">
-          <div className="bg-neutral-900 dark:bg-neutral-900 rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-white mb-4">
+          <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-lg p-8">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
               Ready to Start Your Trip?
             </h2>
-            <p className="text-neutral-300 mb-6">
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
               Create your first trip and let our system handle the rest.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -127,15 +127,21 @@ const HomePage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-blue-600">11</div>
-                <div className="text-sm text-gray-500 dark:text-gray-300">Hour Driving Limit</div>
+                <div className="text-sm text-gray-500 dark:text-gray-300">
+                  Hour Driving Limit
+                </div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-green-600">10</div>
-                <div className="text-sm text-gray-500 dark:text-gray-300">Hour Break Required</div>
+                <div className="text-sm text-gray-500 dark:text-gray-300">
+                  Hour Break Required
+                </div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-purple-600">30</div>
-                <div className="text-sm text-gray-500 dark:text-gray-300">Min Rest Break</div>
+                <div className="text-sm text-gray-500 dark:text-gray-300">
+                  Min Rest Break
+                </div>
               </div>
             </div>
           </div>
