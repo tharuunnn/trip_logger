@@ -41,16 +41,19 @@ export const validateTripForm = (data: {
       field: "pickup_location",
       message: "Pickup location is required",
     });
-  } else if (data.pickup_location.trim().length < 5) {
-    errors.push({
-      field: "pickup_location",
-      message: "Pickup location must be at least 5 characters",
-    });
-  } else if (data.pickup_location.trim().length > 200) {
-    errors.push({
-      field: "pickup_location",
-      message: "Pickup location must be less than 200 characters",
-    });
+  } else {
+    const parts = data.pickup_location.split(",").map((p) => p.trim());
+    if (parts.length < 3) {
+      errors.push({
+        field: "pickup_location",
+        message: "Pickup location must be in the format: City, State, Country",
+      });
+    } else if (data.pickup_location.length > 200) {
+      errors.push({
+        field: "pickup_location",
+        message: "Pickup location must be less than 200 characters",
+      });
+    }
   }
 
   // Dropoff location validation
@@ -59,16 +62,19 @@ export const validateTripForm = (data: {
       field: "dropoff_location",
       message: "Dropoff location is required",
     });
-  } else if (data.dropoff_location.trim().length < 5) {
-    errors.push({
-      field: "dropoff_location",
-      message: "Dropoff location must be at least 5 characters",
-    });
-  } else if (data.dropoff_location.trim().length > 200) {
-    errors.push({
-      field: "dropoff_location",
-      message: "Dropoff location must be less than 200 characters",
-    });
+  } else {
+    const parts = data.dropoff_location.split(",").map((p) => p.trim());
+    if (parts.length < 3) {
+      errors.push({
+        field: "dropoff_location",
+        message: "Dropoff location must be in the format: City, State, Country",
+      });
+    } else if (data.dropoff_location.length > 200) {
+      errors.push({
+        field: "dropoff_location",
+        message: "Dropoff location must be less than 200 characters",
+      });
+    }
   }
 
   // Start time validation

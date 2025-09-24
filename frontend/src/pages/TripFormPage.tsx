@@ -55,16 +55,46 @@ const TripFormPage = () => {
       return;
     }
 
-    try {
-      const response = await tripAPI.createTrip(formData);
-      navigate(`/trips/${response.data.id}`);
-    } catch (err: any) {
-      setError(
-        err.response?.data?.detail || err.message || "An error occurred"
-      );
-    } finally {
+    // Get user's current location
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
       setLoading(false);
+      return;
     }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+
+        console.log("Frontend GPS coordinates:", latitude, longitude);
+
+        const { current_location: _, ...rest } = formData;
+        const payload = {
+          ...rest,
+          current_location: {
+            lat: latitude,
+            lon: longitude,
+            address: "Current Location", // optional
+          },
+        };
+
+        try {
+          const response = await tripAPI.createTrip(payload);
+          navigate(`/trips/${response.data.id}`);
+        } catch (err: any) {
+          setError(
+            err.response?.data?.detail || err.message || "An error occurred"
+          );
+        } finally {
+          setLoading(false);
+        }
+      },
+      (error) => {
+        alert("Please allow location access to start the trip");
+        setLoading(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
   };
 
   return (
@@ -170,6 +200,12 @@ const TripFormPage = () => {
                   placeholder="Enter pickup location"
                   required
                 />
+
+                {/* Example hint */}
+                <p className="mt-1 text-xs text-gray-500">
+                  Example: Los Angeles, California, USA
+                </p>
+
                 {hasFieldError(validationErrors, "pickup_location") && (
                   <p className="mt-2 text-sm text-red-600 flex items-center">
                     <svg

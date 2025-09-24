@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { logAPI, tripAPI } from "../services/api";
+import { entryAPI, logAPI, tripAPI } from "../services/api";
 import type { ValidationError } from "../utils/validation";
-import { hasFieldError, validateDailyLogForm } from "../utils/validation";
+import { hasFieldError } from "../utils/validation";
 
 interface Trip {
   id: number;
@@ -17,9 +17,9 @@ const DailyLogFormPage = () => {
   const [trip, setTrip] = useState<Trip | null>(null);
   const [formData, setFormData] = useState({
     day: "",
-    driving_hours: 0,
-    off_duty_hours: 0,
     status: "off_duty",
+    start_time: "", // HH:MM
+    duration_hours: "",
     remarks: "",
   });
   const [loading, setLoading] = useState(false);
@@ -53,10 +53,7 @@ const DailyLogFormPage = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]:
-        name === "driving_hours" || name === "off_duty_hours"
-          ? parseFloat(value) || 0
-          : value,
+      [name]: value,
     }));
 
     // Clear validation error for this field when user starts typing
@@ -73,19 +70,58 @@ const DailyLogFormPage = () => {
     setError(null);
     setValidationErrors([]);
 
-    // Validate form data
-    const validation = validateDailyLogForm(formData);
-    if (!validation.isValid) {
-      setValidationErrors(validation.errors);
+    // Basic validation for entry
+    const errors: ValidationError[] = [];
+    if (!formData.day)
+      errors.push({ field: "day", message: "Date is required" });
+    if (!formData.status)
+      errors.push({ field: "status", message: "Status is required" });
+    if (!formData.start_time)
+      errors.push({ field: "start_time", message: "Start time is required" });
+    if (formData.duration_hours === "")
+      errors.push({ field: "duration_hours", message: "Duration is required" });
+    if (errors.length) {
+      setValidationErrors(errors);
       setLoading(false);
       return;
     }
 
     try {
-      const response = await logAPI.createLog({
-        ...formData,
-        trip: parseInt(tripId!),
+      // Find or create DailyLog for the selected day
+      const tripNumericId = parseInt(tripId!);
+      const logsResp = await tripAPI.getTripLogs(tripNumericId);
+      const existing = (logsResp.data || []).find(
+        (l: any) => l.day === formData.day
+      );
+      let dailyLogId: number;
+      if (existing) {
+        dailyLogId = existing.id;
+      } else {
+        const createResp = await logAPI.createLog({
+          trip: tripNumericId,
+          day: formData.day,
+          status: formData.status,
+          driving_hours: 0,
+          off_duty_hours: 0,
+          remarks: "",
+        });
+        dailyLogId = createResp.data.id;
+      }
+
+      // Convert HH:MM to decimal hours
+      const [hh, mm] = formData.start_time.split(":");
+      const startHour =
+        (parseInt(hh || "0") || 0) + (parseInt(mm || "0") || 0) / 60;
+      const durationNum = parseFloat(String(formData.duration_hours));
+
+      const response = await entryAPI.createEntry({
+        daily_log: dailyLogId,
+        status: formData.status,
+        start_hour: startHour,
+        duration_hours: durationNum,
+        remarks: formData.remarks,
       });
+      console.log("Create entry response:", response.status, response.data);
       navigate(`/trips/${tripId}`);
     } catch (err: any) {
       setError(
@@ -125,7 +161,7 @@ const DailyLogFormPage = () => {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Add Daily Log</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Add to Log</h1>
           <p className="mt-2 text-gray-600">
             {trip &&
               `For Trip #${trip.id}: ${trip.pickup_location} → ${trip.dropoff_location}`}
@@ -178,56 +214,45 @@ const DailyLogFormPage = () => {
               </select>
             </div>
 
-            {/* Driving Hours */}
+            {/* Start Time */}
             <div>
               <label
-                htmlFor="driving_hours"
+                htmlFor="start_time"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Driving Hours *
+                Start Time *
               </label>
               <input
-                type="number"
-                id="driving_hours"
-                name="driving_hours"
-                value={formData.driving_hours}
+                type="time"
+                id="start_time"
+                name="start_time"
+                value={formData.start_time}
                 onChange={handleChange}
                 required
-                min="0"
-                max="11"
-                step="0.1"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="0.0"
               />
-              <p className="mt-1 text-sm text-gray-500">
-                Hours spent driving (0-11 hours per day)
-              </p>
             </div>
 
-            {/* Off Duty Hours */}
+            {/* Duration (hours) */}
             <div>
               <label
-                htmlFor="off_duty_hours"
+                htmlFor="duration_hours"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Off Duty Hours *
+                Duration (hours) *
               </label>
               <input
                 type="number"
-                id="off_duty_hours"
-                name="off_duty_hours"
-                value={formData.off_duty_hours}
+                id="duration_hours"
+                name="duration_hours"
+                value={formData.duration_hours}
                 onChange={handleChange}
                 required
                 min="0"
-                max="24"
                 step="0.1"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="0.0"
               />
-              <p className="mt-1 text-sm text-gray-500">
-                Hours spent off duty (minimum 10 hours required)
-              </p>
             </div>
 
             {/* Remarks */}
@@ -277,7 +302,31 @@ const DailyLogFormPage = () => {
                 disabled={loading}
                 className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? "Creating..." : "Create Log"}
+                {loading ? (
+                  <span className="inline-flex items-center">
+                    <svg
+                      className="animate-spin h-4 w-4 mr-2 text-white"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                      ></path>
+                    </svg>
+                    Creating...
+                  </span>
+                ) : (
+                  "Add Entry"
+                )}
               </button>
             </div>
           </form>

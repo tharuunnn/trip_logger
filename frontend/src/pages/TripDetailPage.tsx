@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import LogsVisualization from "../components/LogsVisualization";
-import RouteMap from "../components/RouteMap";
+import RouteMap from "../components/RouteMapRL";
 import { useRefresh } from "../hooks/useRefresh";
 import { tripAPI } from "../services/api";
-
 interface Trip {
   id: number;
   driver_name: string;
@@ -28,25 +27,66 @@ interface DailyLog {
 
 const TripDetailPage = () => {
   const { id } = useParams<{ id: string }>();
-  const { refreshKey, refresh } = useRefresh();
+  const { refreshKey } = useRefresh();
   const [trip, setTrip] = useState<Trip | null>(null);
   const [logs, setLogs] = useState<DailyLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [calculatingRoute, setCalculatingRoute] = useState(false);
-  const [routeData, setRouteData] = useState<any>(null);
+  // Minimal route data typing to avoid 'any' while allowing flexible shape
+  const [routeData, setRouteData] = useState<{
+    route?: {
+      total_distance?: number | string;
+      total_driving_time?: number | string;
+      total_trip_time?: number | string;
+      stops?: { description: string; duration: number }[];
+      segments?: { coordinates?: [number, number][] }[];
+      combined_coordinates?: [number, number][];
+    };
+  } | null>(null);
+  const [currentLocation, setCurrentLocation] = useState<
+    { lat: number; lon: number; address: string } | undefined
+  >(undefined);
+  const [pickupLocation, setPickupLocation] = useState<
+    { lat: number; lon: number; address: string } | undefined
+  >(undefined);
+  const [dropoffLocation, setDropoffLocation] = useState<
+    { lat: number; lon: number; address: string } | undefined
+  >(undefined);
+
+  // Load persisted route + markers (per-trip) on mount/id change
+  useEffect(() => {
+    if (!id) return;
+    try {
+      const savedRoute = localStorage.getItem(`routeData_${id}`);
+      const savedMarkers = localStorage.getItem(`routeMarkers_${id}`);
+      if (savedRoute) {
+        setRouteData(JSON.parse(savedRoute));
+      }
+      if (savedMarkers) {
+        const m = JSON.parse(savedMarkers);
+        setCurrentLocation(m.currentLocation || undefined);
+        setPickupLocation(m.pickupLocation || undefined);
+        setDropoffLocation(m.dropoffLocation || undefined);
+      }
+    } catch {
+      console.debug("Failed to parse saved route/markers from localStorage");
+    }
+  }, [id]);
 
   useEffect(() => {
     if (id) {
       fetchTripDetails();
       fetchTripLogs();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, refreshKey]);
 
   const fetchTripDetails = async () => {
     try {
       const response = await tripAPI.getTrip(parseInt(id!));
       setTrip(response.data);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(
         err.response?.data?.detail || err.message || "An error occurred"
@@ -59,7 +99,21 @@ const TripDetailPage = () => {
   const fetchTripLogs = async () => {
     try {
       const response = await tripAPI.getTripLogs(parseInt(id!));
-      setLogs(response.data);
+      // Coerce numeric fields that come from API as strings (Decimal) into numbers
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const normalized = (response.data || []).map((log: any) => ({
+        ...log,
+        driving_hours:
+          typeof log.driving_hours === "string"
+            ? parseFloat(log.driving_hours)
+            : log.driving_hours,
+        off_duty_hours:
+          typeof log.off_duty_hours === "string"
+            ? parseFloat(log.off_duty_hours)
+            : log.off_duty_hours,
+      }));
+      setLogs(normalized);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error("Error fetching logs:", err);
     }
@@ -68,18 +122,123 @@ const TripDetailPage = () => {
   const calculateRoute = async () => {
     try {
       setCalculatingRoute(true);
-      const response = await tripAPI.calculateRoute(parseInt(id!), {
-        lat: 40.7128,
-        lon: -74.006,
-        address: "Current Location",
-      });
-      setRouteData(response.data);
+
+      if (!navigator.geolocation) {
+        alert("Geolocation is not supported by your browser");
+        return;
+      }
+
+      // Get real-time location
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+
+          // Send to backend directly
+          const response = await tripAPI.calculateRoute(parseInt(id!), {
+            lat: latitude,
+            lon: longitude,
+            address: "Current Location",
+          });
+
+          const data = response.data;
+          console.log("Route calc response:", data);
+          console.log(
+            "Segments lengths:",
+            data?.route?.segments?.map(
+              (s: { coordinates?: [number, number][] }) =>
+                s?.coordinates?.length || 0
+            )
+          );
+          console.log(
+            "Combined coords length:",
+            data?.route?.combined_coordinates?.length || 0
+          );
+          setRouteData(data);
+          try {
+            localStorage.setItem(`routeData_${id}`, JSON.stringify(data));
+          } catch {
+            console.debug("Failed to persist routeData to localStorage");
+          }
+
+          // Set marker states from response + geolocation
+          setCurrentLocation({
+            lat: latitude,
+            lon: longitude,
+            address: "Current Location",
+          });
+
+          const seg0 = data?.route?.segments?.[0];
+          const seg1 = data?.route?.segments?.[1];
+          const seg0Coords: [number, number][] | undefined = seg0?.coordinates;
+          const seg1Coords: [number, number][] | undefined = seg1?.coordinates;
+
+          const pickupCoord =
+            seg0Coords && seg0Coords.length > 0
+              ? seg0Coords[seg0Coords.length - 1]
+              : undefined;
+          const dropoffCoord =
+            seg1Coords && seg1Coords.length > 0
+              ? seg1Coords[seg1Coords.length - 1]
+              : undefined;
+
+          if (pickupCoord) {
+            setPickupLocation({
+              lat: pickupCoord[0],
+              lon: pickupCoord[1],
+              address: trip?.pickup_location || "Pickup",
+            });
+          }
+          if (dropoffCoord) {
+            setDropoffLocation({
+              lat: dropoffCoord[0],
+              lon: dropoffCoord[1],
+              address: trip?.dropoff_location || "Dropoff",
+            });
+          }
+
+          // Persist markers
+          try {
+            localStorage.setItem(
+              `routeMarkers_${id}`,
+              JSON.stringify({
+                currentLocation: {
+                  lat: latitude,
+                  lon: longitude,
+                  address: "Current Location",
+                },
+                pickupLocation: pickupCoord
+                  ? {
+                      lat: pickupCoord[0],
+                      lon: pickupCoord[1],
+                      address: trip?.pickup_location || "Pickup",
+                    }
+                  : undefined,
+                dropoffLocation: dropoffCoord
+                  ? {
+                      lat: dropoffCoord[0],
+                      lon: dropoffCoord[1],
+                      address: trip?.dropoff_location || "Dropoff",
+                    }
+                  : undefined,
+              })
+            );
+          } catch {
+            console.debug("Failed to persist routeMarkers to localStorage");
+          }
+          // Ensure loader turns off after successful processing
+          setCalculatingRoute(false);
+        },
+        () => {
+          alert("Please allow location access to calculate route");
+          setCalculatingRoute(false);
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(
         err.response?.data?.detail || err.message || "Route calculation failed"
       );
-    } finally {
-      setCalculatingRoute(false);
     }
   };
 
@@ -93,20 +252,7 @@ const TripDetailPage = () => {
     });
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "driving":
-        return "bg-blue-100 text-blue-800";
-      case "off_duty":
-        return "bg-gray-100 text-gray-800";
-      case "sleeper_berth":
-        return "bg-purple-100 text-purple-800";
-      case "on_duty_not_driving":
-        return "bg-yellow-100 text-yellow-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
+  // getStatusColor was unused in this component; removed to avoid linter warning
 
   if (loading) {
     return (
@@ -155,12 +301,6 @@ const TripDetailPage = () => {
           </div>
           <div className="flex space-x-3">
             <button
-              onClick={refresh}
-              className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors"
-            >
-              🔄 Refresh
-            </button>
-            <button
               onClick={calculateRoute}
               disabled={calculatingRoute}
               className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors disabled:opacity-50"
@@ -171,7 +311,7 @@ const TripDetailPage = () => {
               to={`/trips/${trip.id}/logs/new`}
               className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors"
             >
-              Add Log
+              Add to Log
             </Link>
           </div>
         </div>
@@ -220,7 +360,7 @@ const TripDetailPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-blue-600">
-                      {routeData.route.total_distance}
+                      {routeData?.route?.total_distance ?? "--"}
                     </div>
                     <div className="text-sm text-gray-500">
                       Total Distance (miles)
@@ -228,7 +368,7 @@ const TripDetailPage = () => {
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-green-600">
-                      {routeData.route.total_driving_time}
+                      {routeData?.route?.total_driving_time ?? "--"}
                     </div>
                     <div className="text-sm text-gray-500">
                       Driving Time (hours)
@@ -236,7 +376,7 @@ const TripDetailPage = () => {
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-purple-600">
-                      {routeData.route.total_trip_time}
+                      {routeData?.route?.total_trip_time ?? "--"}
                     </div>
                     <div className="text-sm text-gray-500">
                       Total Time (hours)
@@ -244,26 +384,34 @@ const TripDetailPage = () => {
                   </div>
                 </div>
 
-                {routeData.route.stops && routeData.route.stops.length > 0 && (
-                  <div>
-                    <h3 className="font-medium text-gray-900 mb-2">
-                      Required Stops
-                    </h3>
-                    <div className="space-y-2">
-                      {routeData.route.stops.map((stop: any, index: number) => (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between bg-gray-50 p-3 rounded"
-                        >
-                          <span className="text-sm">{stop.description}</span>
-                          <span className="text-sm font-medium">
-                            {stop.duration}h
-                          </span>
-                        </div>
-                      ))}
+                {routeData?.route?.stops &&
+                  routeData.route.stops.length > 0 && (
+                    <div>
+                      <h3 className="font-medium text-gray-900 mb-2">
+                        Required Stops
+                      </h3>
+                      <div className="space-y-2">
+                        {routeData.route.stops.map(
+                          (
+                            stop: { description: string; duration: number },
+                            index: number
+                          ) => (
+                            <div
+                              key={index}
+                              className="flex items-center justify-between bg-gray-50 p-3 rounded"
+                            >
+                              <span className="text-sm">
+                                {stop.description}
+                              </span>
+                              <span className="text-sm font-medium">
+                                {stop.duration}h
+                              </span>
+                            </div>
+                          )
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
               </div>
             )}
 
@@ -271,49 +419,44 @@ const TripDetailPage = () => {
             <LogsVisualization logs={logs} />
 
             {/* Route Map */}
-            <RouteMap
-              routeData={routeData}
-              pickupLocation={{
-                lat: 41.8781,
-                lon: -87.6298,
-                address: trip.pickup_location,
-              }}
-              dropoffLocation={{
-                lat: 34.0522,
-                lon: -118.2437,
-                address: trip.dropoff_location,
-              }}
-              currentLocation={{
-                lat: 40.7128,
-                lon: -74.006,
-                address: "Current Location",
-              }}
-            />
+            <div className="relative">
+              {calculatingRoute && (
+                <div className="absolute inset-0 z-10 bg-white/70 flex items-center justify-center">
+                  <div className="flex items-center space-x-2 text-gray-700">
+                    <svg
+                      className="animate-spin h-5 w-5 text-purple-600"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                      ></path>
+                    </svg>
+                    <span>Calculating route…</span>
+                  </div>
+                </div>
+              )}
+              <RouteMap
+                // RouteMap accepts flexible routeData; pass as-is
+                routeData={routeData as unknown as any}
+                pickupLocation={pickupLocation}
+                dropoffLocation={dropoffLocation}
+                currentLocation={currentLocation}
+              />
+            </div>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Quick Actions */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="font-semibold text-gray-900 mb-4">
-                Quick Actions
-              </h3>
-              <div className="space-y-3">
-                <Link
-                  to={`/trips/${trip.id}/logs/new`}
-                  className="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors text-center block"
-                >
-                  Add Daily Log
-                </Link>
-                <Link
-                  to={`/trips/${trip.id}/edit`}
-                  className="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors text-center block"
-                >
-                  Edit Trip
-                </Link>
-              </div>
-            </div>
-
             {/* Trip Stats */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="font-semibold text-gray-900 mb-4">

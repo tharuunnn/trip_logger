@@ -1,3 +1,6 @@
 from django.contrib import admin
+from .models import Trip, DailyLog, LogEntry
 
-# Register your models here.
+admin.site.register(Trip)
+admin.site.register(DailyLog)
+admin.site.register(LogEntry)

@@ -45,3 +45,25 @@ class DailyLog(models.Model):
     
     def __str__(self):
         return f"Log {self.id}: {self.day} - {self.get_status_display()}"
+
+
+class LogEntry(models.Model):
+    """
+    Model representing an individual activity entry within a daily log.
+    Allows multiple additions to roll up into the same DailyLog.
+    """
+    STATUS_CHOICES = DailyLog.STATUS_CHOICES
+
+    daily_log = models.ForeignKey(DailyLog, on_delete=models.CASCADE, related_name='entries')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+    # Start time within the day in hours (e.g., 13.5 = 1:30 PM)
+    start_hour = models.DecimalField(max_digits=4, decimal_places=2, default=0)
+    duration_hours = models.DecimalField(max_digits=4, decimal_places=2, default=0)
+    remarks = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"Entry {self.id}: {self.status} {self.duration_hours}h"

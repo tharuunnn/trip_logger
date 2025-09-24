@@ -6,7 +6,7 @@ const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 10000, // 10 second timeout
+  timeout: 30000, // 30 second timeout
 });
 
 // Request interceptor for logging
@@ -84,6 +84,20 @@ export const logAPI = {
 // Test API connection
 export const testAPI = {
   hello: () => api.get("/hello/"),
+};
+
+// Log Entry API functions
+export const entryAPI = {
+  // Create new entry
+  createEntry: (data: any) => api.post("/entries/", data),
+
+  // Get entries by daily_log id
+  getEntriesByDailyLog: (dailyLogId: number) =>
+    api.get(`/entries/?daily_log_id=${dailyLogId}`),
+
+  // Get entries by trip and day
+  getEntriesByTripDay: (tripId: number, day: string) =>
+    api.get(`/entries/?trip_id=${tripId}&day=${encodeURIComponent(day)}`),
 };
 
 export default api;

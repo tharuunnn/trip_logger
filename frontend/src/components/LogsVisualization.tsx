@@ -1,5 +1,14 @@
 import React from "react";
 
+interface LogEntry {
+  id: number;
+  status: string;
+  start_hour: number;
+  duration_hours: number;
+  remarks?: string;
+  created_at: string;
+}
+
 interface DailyLog {
   id: number;
   day: string;
@@ -8,6 +17,7 @@ interface DailyLog {
   status: string;
   remarks: string;
   created_at: string;
+  entries?: LogEntry[];
 }
 
 interface LogsVisualizationProps {
@@ -34,14 +44,39 @@ const LogsVisualization: React.FC<LogsVisualizationProps> = ({ logs }) => {
     return status.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
-  // Calculate total hours for each status
-  const statusTotals = logs.reduce((acc, log) => {
-    const status = log.status;
-    if (!acc[status]) {
-      acc[status] = { hours: 0, count: 0 };
-    }
-    acc[status].hours += log.driving_hours + log.off_duty_hours;
-    acc[status].count += 1;
+  // Normalize hours to numbers in case API returns strings (e.g., Decimal fields)
+  const normalizedLogs = logs.map((log) => ({
+    ...log,
+    driving_hours:
+      typeof log.driving_hours === "string"
+        ? parseFloat(log.driving_hours)
+        : log.driving_hours,
+    off_duty_hours:
+      typeof log.off_duty_hours === "string"
+        ? parseFloat(log.off_duty_hours)
+        : log.off_duty_hours,
+    entries: (log.entries || []).map((e) => ({
+      ...e,
+      start_hour:
+        typeof e.start_hour === "string"
+          ? parseFloat(e.start_hour)
+          : e.start_hour,
+      duration_hours:
+        typeof e.duration_hours === "string"
+          ? parseFloat(e.duration_hours)
+          : e.duration_hours,
+    })),
+  }));
+
+  // Calculate total hours for each duty status based on entries
+  const statusTotals = normalizedLogs.reduce((acc, log) => {
+    (log.entries || []).forEach((e) => {
+      if (!acc[e.status]) {
+        acc[e.status] = { hours: 0, count: 0 };
+      }
+      acc[e.status].hours += e.duration_hours || 0;
+      acc[e.status].count += 1;
+    });
     return acc;
   }, {} as Record<string, { hours: number; count: number }>);
 
@@ -81,13 +116,102 @@ const LogsVisualization: React.FC<LogsVisualizationProps> = ({ logs }) => {
             ))}
           </div>
 
-          {/* Timeline Visualization */}
+          {/* ELD-style timeline (SVG with axes and step line) */}
           <div className="space-y-4">
             <h4 className="font-medium text-gray-900">Timeline</h4>
             <div className="space-y-3">
-              {logs.map((log, index) => {
-                const drivingPercentage = (log.driving_hours / 24) * 100;
-                const offDutyPercentage = (log.off_duty_hours / 24) * 100;
+              {normalizedLogs.map((log) => {
+                const entries = (log.entries || []).map((e) => ({
+                  ...e,
+                  start_hour:
+                    typeof e.start_hour === "string"
+                      ? parseFloat(e.start_hour)
+                      : e.start_hour,
+                  duration_hours:
+                    typeof e.duration_hours === "string"
+                      ? parseFloat(e.duration_hours)
+                      : e.duration_hours,
+                }));
+
+                // Lanes and helpers
+                const lanes = [
+                  { key: "off_duty", label: "Off Duty" },
+                  { key: "sleeper_berth", label: "Sleeper" },
+                  { key: "driving", label: "Driving" },
+                  { key: "on_duty_not_driving", label: "On Duty" },
+                ];
+                const laneIndex = (status: string) =>
+                  lanes.findIndex((l) => l.key === status);
+
+                // Build colored step-line segments from entries
+                const sorted = [...entries].sort(
+                  (a, b) => a.start_hour - b.start_hour
+                );
+                const width = 900;
+                const height = 180;
+                const leftPad = 64;
+                const topPad = 12;
+                const usableW = width - leftPad - 12;
+                const rowH = (height - topPad - 24) / lanes.length;
+                const yForStatus = (status: string) =>
+                  topPad + rowH * (laneIndex(status) + 0.5);
+                const xForHour = (h: number) => leftPad + (h / 24) * usableW;
+                const formatHour12 = (h: number) => {
+                  const hour = h % 12 || 12;
+                  const suffix = h < 12 ? "am" : "pm";
+                  return `${hour}${suffix}`;
+                };
+                const xForQuarter = (q: number) => leftPad + (q / 96) * usableW; // 96 quarters per day
+
+                type HSeg = {
+                  x1: number;
+                  x2: number;
+                  y: number;
+                  color: string;
+                };
+                type VSeg = {
+                  x: number;
+                  y1: number;
+                  y2: number;
+                  color: string;
+                };
+                const hsegs: HSeg[] = [];
+                const vsegs: VSeg[] = [];
+                if (sorted.length > 0) {
+                  let prevEnd: number | null = null;
+                  let prevStatus: string | null = null;
+                  sorted.forEach((e) => {
+                    const start = Math.max(0, Math.min(24, e.start_hour));
+                    const end = Math.max(
+                      0,
+                      Math.min(24, e.start_hour + e.duration_hours)
+                    );
+                    const y = yForStatus(e.status);
+                    const color = getStatusColor(e.status);
+                    if (
+                      prevEnd !== null &&
+                      Math.abs(start - prevEnd) < 1e-6 &&
+                      prevStatus &&
+                      prevStatus !== e.status
+                    ) {
+                      // vertical transition at exact boundary
+                      vsegs.push({
+                        x: xForHour(start),
+                        y1: yForStatus(prevStatus),
+                        y2: y,
+                        color,
+                      });
+                    }
+                    hsegs.push({
+                      x1: xForHour(start),
+                      x2: xForHour(end),
+                      y,
+                      color,
+                    });
+                    prevEnd = end;
+                    prevStatus = e.status;
+                  });
+                }
 
                 return (
                   <div key={log.id} className="border rounded-lg p-4">
@@ -100,49 +224,98 @@ const LogsVisualization: React.FC<LogsVisualizationProps> = ({ logs }) => {
                             day: "numeric",
                           })}
                         </h5>
-                        <span
-                          className="inline-block px-2 py-1 rounded-full text-xs font-medium"
-                          style={{
-                            backgroundColor: getStatusColor(log.status) + "20",
-                            color: getStatusColor(log.status),
-                          }}
-                        >
-                          {getStatusLabel(log.status)}
-                        </span>
                       </div>
                       <div className="text-sm text-gray-500">Log #{log.id}</div>
                     </div>
-
-                    {/* Hours Bar */}
-                    <div className="flex h-6 bg-gray-100 rounded-md overflow-hidden">
-                      {log.driving_hours > 0 && (
-                        <div
-                          className="bg-blue-500 flex items-center justify-center text-white text-xs font-medium"
-                          style={{ width: `${drivingPercentage}%` }}
+                    <svg
+                      width="100%"
+                      viewBox={`0 0 ${width} ${height}`}
+                      className="rounded-md border"
+                    >
+                      {/* Y labels */}
+                      {lanes.map((lane, i) => (
+                        <text
+                          key={lane.key}
+                          x={8}
+                          y={topPad + rowH * (i + 0.6)}
+                          fontSize="12"
+                          fill="#374151"
                         >
-                          {log.driving_hours > 1 && `${log.driving_hours}h`}
-                        </div>
-                      )}
-                      {log.off_duty_hours > 0 && (
-                        <div
-                          className="bg-gray-500 flex items-center justify-center text-white text-xs font-medium"
-                          style={{ width: `${offDutyPercentage}%` }}
-                        >
-                          {log.off_duty_hours > 1 && `${log.off_duty_hours}h`}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex justify-between text-xs text-gray-500 mt-2">
-                      <span>Driving: {log.driving_hours}h</span>
-                      <span>Off-duty: {log.off_duty_hours}h</span>
-                    </div>
-
-                    {log.remarks && (
-                      <div className="mt-2 text-sm text-gray-600 bg-gray-50 p-2 rounded">
-                        <strong>Remarks:</strong> {log.remarks}
-                      </div>
-                    )}
+                          {lane.label}
+                        </text>
+                      ))}
+                      {/* 15-min subgrid */}
+                      {Array.from({ length: 97 }).map((_, i) => (
+                        <line
+                          key={`q${i}`}
+                          x1={xForQuarter(i)}
+                          y1={topPad}
+                          x2={xForQuarter(i)}
+                          y2={height - 12}
+                          stroke="#f3f4f6"
+                          strokeWidth={1}
+                        />
+                      ))}
+                      {/* Hour grid + 12-hour labels */}
+                      {Array.from({ length: 25 }).map((_, i) => (
+                        <g key={i}>
+                          <line
+                            x1={xForHour(i)}
+                            y1={topPad}
+                            x2={xForHour(i)}
+                            y2={height - 12}
+                            stroke="#e5e7eb"
+                            strokeWidth={i % 6 === 0 ? 2 : 1}
+                          />
+                          <text
+                            x={xForHour(i)}
+                            y={height - 2}
+                            fontSize="10"
+                            textAnchor="middle"
+                            fill="#6b7280"
+                          >
+                            {formatHour12(i)}
+                          </text>
+                        </g>
+                      ))}
+                      {/* Horizontal lane lines */}
+                      {lanes.map((lane, i) => (
+                        <line
+                          key={lane.key}
+                          x1={leftPad}
+                          y1={topPad + rowH * (i + 1)}
+                          x2={width - 12}
+                          y2={topPad + rowH * (i + 1)}
+                          stroke="#d1d5db"
+                          strokeWidth={1}
+                        />
+                      ))}
+                      {/* Colored horizontal segments per entry */}
+                      {hsegs.map((s, i) => (
+                        <line
+                          key={`h-${i}`}
+                          x1={s.x1}
+                          y1={s.y}
+                          x2={s.x2}
+                          y2={s.y}
+                          stroke={s.color}
+                          strokeWidth={3}
+                          strokeLinecap="round"
+                        />
+                      ))}
+                      {/* Vertical connectors at boundaries */}
+                      {vsegs.map((v, i) => (
+                        <line
+                          key={`v-${i}`}
+                          x1={v.x}
+                          y1={v.y1}
+                          x2={v.x}
+                          y2={v.y2}
+                          stroke={v.color}
+                          strokeWidth={3}
+                        />
+                      ))}
+                    </svg>
                   </div>
                 );
               })}

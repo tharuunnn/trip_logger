@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Trip, DailyLog
+from .models import Trip, DailyLog, LogEntry
 
 
 class TripSerializer(serializers.ModelSerializer):
@@ -25,16 +25,21 @@ class DailyLogSerializer(serializers.ModelSerializer):
     """
     trip_driver_name = serializers.CharField(source='trip.driver_name', read_only=True)
     trip_route = serializers.SerializerMethodField()
+    entries = serializers.SerializerMethodField()
     
     class Meta:
         model = DailyLog
         fields = ['id', 'trip', 'trip_driver_name', 'trip_route', 'day', 'driving_hours', 
-                 'off_duty_hours', 'status', 'remarks', 'created_at']
+                 'off_duty_hours', 'status', 'remarks', 'entries', 'created_at']
         read_only_fields = ['id', 'created_at']
     
     def get_trip_route(self, obj):
         """Get formatted trip route for display."""
         return f"{obj.trip.pickup_location} → {obj.trip.dropoff_location}"
+
+    def get_entries(self, obj):
+        entries = obj.entries.all().order_by('created_at')
+        return LogEntrySerializer(entries, many=True).data
     
     def validate_driving_hours(self, value):
         """Validate driving hours are within legal limits."""
@@ -49,6 +54,25 @@ class DailyLogSerializer(serializers.ModelSerializer):
         if value < 0:
             raise serializers.ValidationError("Off-duty hours cannot be negative.")
         return value
+
+
+class LogEntrySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LogEntry
+        fields = ['id', 'daily_log', 'status', 'start_hour', 'duration_hours', 'remarks', 'created_at']
+        read_only_fields = ['id', 'created_at']
+
+    def validate(self, attrs):
+        start = attrs.get('start_hour')
+        duration = attrs.get('duration_hours')
+        if start is not None and (start < 0 or start >= 24):
+            raise serializers.ValidationError({"start_hour": "Must be within 0-24."})
+        if duration is not None and duration <= 0:
+            raise serializers.ValidationError({"duration_hours": "Must be greater than 0."})
+        if start is not None and duration is not None:
+            if start + duration > 24:
+                raise serializers.ValidationError("Entry extends beyond the day (max 24h).")
+        return attrs
 
 
 class TripDetailSerializer(TripSerializer):
