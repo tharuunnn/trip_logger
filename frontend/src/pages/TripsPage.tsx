@@ -89,7 +89,7 @@ const TripsPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-neutral-950 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-500 mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-300">Loading trips...</p>
@@ -100,7 +100,7 @@ const TripsPage = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-neutral-950 flex items-center justify-center">
         <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-lg p-8 max-w-md w-full mx-4">
           <div className="text-center">
             <div className="text-red-500 text-4xl mb-4">⚠️</div>
