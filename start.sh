@@ -4,6 +4,9 @@ set -e
 # Go into the backend folder
 cd backend
 
+# Install dependencies
+pip install -r requirements.txt
+
 # Apply migrations
 python manage.py migrate --noinput
 
@@ -11,4 +14,4 @@ python manage.py migrate --noinput
 python manage.py collectstatic --noinput
 
 # Start the server with Gunicorn
-exec gunicorn core.wsgi:application --bind 0.0.0.0:$PORT --workers 4
+exec gunicorn core.wsgi --bind 0.0.0.0:$PORT --workers 4
