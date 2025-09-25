@@ -31,15 +31,13 @@ services:
   # Frontend Service
   - type: web
     name: trip-logger-frontend
-    env: node
+    env: static
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
     envVars:
       - key: VITE_BACKEND_URL
         value: https://trip-logger.onrender.com
-      - key: NODE_VERSION
-        value: 18.x
 
 # Database Configuration
 databases:
