@@ -2,13 +2,16 @@ services:
   - type: web
     name: trip-logger-backend
     env: python
-    buildCommand: pip install -r requirements.txt && python manage.py migrate && python manage.py collectstatic --noinput
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
     startCommand: gunicorn --bind 0.0.0.0:$PORT core.wsgi:application
     envVars:
+      - key: RENDER
+        value: true
       - key: ORS_API_KEY
         sync: false
       - key: DEBUG
-        value: False
+        value: false
       - key: SECRET_KEY
         generateValue: true
       - key: DATABASE_URL
@@ -21,12 +24,12 @@ services:
           name: trip-logger-redis
           property: connectionString
 
+databases:
+  - name: trip-logger-db
+    databaseName: trip_logger
+    user: trip_logger_user
+
+services:
   - type: redis
     name: trip-logger-redis
-    plan: free
-
-  - type: pserv
-    name: trip-logger-db
-    env: postgresql
-    plan: free
-    region: oregon
+    maxmemoryPolicy: allkeys-lru

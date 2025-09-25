@@ -12,14 +12,19 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from decouple import config, Config, RepositoryEnv
+import dj_database_url
+import os
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 env_file = BASE_DIR / '.env'
-config = Config(RepositoryEnv(env_file))
-
+if env_file.exists():
+    config = Config(RepositoryEnv(env_file))
+else:
+    # Production environment - use environment variables directly
+    from decouple import config
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -162,5 +167,29 @@ RATELIMIT_ENABLE = True
 # OpenRouteService API configuration
 ORS_BASE_URL = "https://api.openrouteservice.org/v2"
 ORS_RATE_LIMIT = 2000  # requests per day (free tier)
- 
- 
+
+# Production settings
+if 'RENDER' in os.environ:
+    DEBUG = False
+    ALLOWED_HOSTS = [os.environ.get('RENDER_EXTERNAL_HOSTNAME'), 'localhost', '127.0.0.1']
+    
+    # Database
+    DATABASES = {
+        'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
+    }
+    
+    # Static files
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    
+    # Add WhiteNoise middleware for static files
+    MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+    
+    # CORS for production
+    CORS_ALLOWED_ORIGINS = [
+        f"https://{os.environ.get('FRONTEND_URL', 'your-frontend.netlify.app')}",
+        "http://localhost:3000",  # Keep for local development
+    ]
+else:
+    # Development settings
+    DEBUG = config("DEBUG", default=True, cast=bool)
+    ALLOWED_HOSTS = []
