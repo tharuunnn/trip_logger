@@ -89,8 +89,10 @@ class OpenRouteServiceClient:
         
         try:
             response = requests.post(url, headers=self.headers, json=payload, timeout=30)
-            # print("ORS HTTP status:", response.status_code)
-
+            # Debug logging for diagnostics
+            logger.info(f"ORS POST {url} status={response.status_code} payload={payload}")
+            if response.status_code >= 400:
+                logger.error(f"ORS POST error body: {response.text[:500]}")
             response.raise_for_status()
             
             data = response.json()
@@ -110,8 +112,32 @@ class OpenRouteServiceClient:
 
             return route_info
             
+        except requests.exceptions.HTTPError as e:
+            # If POST fails (common 400), try a GET fallback with start/end query params
+            try:
+                start = f"{start_coords[0]},{start_coords[1]}"
+                end = f"{end_coords[0]},{end_coords[1]}"
+                get_url = f"{self.base_url}/directions/driving-car"
+                params = {
+                    "api_key": self.api_key,
+                    "start": start,
+                    "end": end,
+                }
+                logger.warning(f"ORS POST failed ({e}); trying GET fallback {get_url} params={params}")
+                get_resp = requests.get(get_url, params=params, timeout=30)
+                logger.info(f"ORS GET status={get_resp.status_code} url={get_resp.url}")
+                if get_resp.status_code >= 400:
+                    logger.error(f"ORS GET error body: {get_resp.text[:500]}")
+                get_resp.raise_for_status()
+                data = get_resp.json()
+                if 'routes' not in data or not data['routes']:
+                    raise Exception("No route found (GET fallback)")
+                return self._parse_route_response(data['routes'][0])
+            except Exception as inner:
+                logger.exception(f"ORS GET fallback also failed: {inner}")
+                raise Exception(f"Failed to calculate route: {e}")
         except requests.exceptions.RequestException as e:
-            print("OpenRouteService API error:", e)
+            logger.exception("OpenRouteService API error")
             raise Exception(f"Failed to calculate route: {e}")
         except Exception as e:
             print("Route calculation error:", e)
