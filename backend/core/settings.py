@@ -1,3 +1,4 @@
+
 """
 Django settings for core project.
 
@@ -11,31 +12,37 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
-from decouple import config, Config, RepositoryEnv
+from decouple import  Config, RepositoryEnv
 import dj_database_url
 import os
+
+from pathlib import Path
+
+# Explicitly load .env file
+env_file = Path("../.env")
+if env_file.exists():
+    config = Config(RepositoryEnv(env_file))
+else:
+    from decouple import config
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-env_file = BASE_DIR / '.env'
-if env_file.exists():
-    config = Config(RepositoryEnv(env_file))
-else:
-    # Production environment - use environment variables directly
-    from decouple import config
+
+# Simple environment loading - python-decouple handles .env files automatically
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-auua#syshft84*v=2_mw^=jp@%6e7yb451)u5^3wxs655s8tn3'
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-auua#syshft84*v=2_mw^=jp@%6e7yb451)u5^3wxs655s8tn3')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=lambda x: x.split(','))
 
 
 # Application definition
@@ -88,17 +95,25 @@ TEMPLATES = [
 WSGI_APPLICATION = 'core.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-CORS_ALLOW_ALL_ORIGINS = True   
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Database Configuration
+# Use DATABASE_URL if available (for production), otherwise use SQLite (for development)
+if os.environ.get('DATABASE_URL'):
+    # Production database (PostgreSQL from Render/Railway)
+    DATABASES = {
+        'default': dj_database_url.config(
+            conn_max_age=600,
+            ssl_require=True,
+            conn_health_checks=True
+        )
     }
-}
+else:
+    # Development database (SQLite)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -142,21 +157,24 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-ORS_API_KEY = config("ORS_API_KEY")
-DEBUG = config("DEBUG", default=True, cast=bool)
+
+# API Keys and Configuration
+ORS_API_KEY = config("ORS_API_KEY", default="")
+
+# Debug what API key Django is actually loading
+#print(f"DEBUG: ORS_API_KEY loaded as: '{ORS_API_KEY}'")
+#print(f"DEBUG: Is placeholder? {ORS_API_KEY == 'your_openrouteservice_api_key_here'}")
 
 # Cache configuration for route calculations
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://:tIOzGcsTTmGKQyA0mTqf34UhlPqX3E23@redis-14737.c301.ap-south-1-1.ec2.redns.redis-cloud.com:14737/0',
+        'LOCATION': config('REDIS_URL', default='redis://127.0.0.1:6379/0'),
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         },
         'KEY_PREFIX': 'trip_logger',
         'TIMEOUT': 3600,  # 1 hour cache timeout
-
-        
     }
 }
 
@@ -168,28 +186,27 @@ RATELIMIT_ENABLE = True
 ORS_BASE_URL = "https://api.openrouteservice.org/v2"
 ORS_RATE_LIMIT = 2000  # requests per day (free tier)
 
-# Production settings
+# CORS Configuration
+CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=True, cast=bool)
+
+if not CORS_ALLOW_ALL_ORIGINS:
+    CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='http://localhost:3000,http://localhost:5173', cast=lambda x: x.split(','))
+
+# Production-specific settings
 if 'RENDER' in os.environ:
     DEBUG = False
-    ALLOWED_HOSTS = [os.environ.get('RENDER_EXTERNAL_HOSTNAME'), 'localhost', '127.0.0.1']
-    
-    # Database
-    DATABASES = {
-        'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
-    }
-    
-    # Static files
+    SECRET_KEY = os.environ.get('SECRET_KEY', SECRET_KEY)
+    ALLOWED_HOSTS = [os.environ.get('RENDER_EXTERNAL_HOSTNAME', 'localhost'), '127.0.0.1']
+
+    # Static files for production
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-    
+
     # Add WhiteNoise middleware for static files
     MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
-    
+
     # CORS for production
     CORS_ALLOWED_ORIGINS = [
-        f"https://{os.environ.get('FRONTEND_URL', 'your-frontend.netlify.app')}",
-        "http://localhost:3000",  # Keep for local development
+        f"https://{os.environ.get('RENDER_EXTERNAL_HOSTNAME', 'localhost')}",
+        "http://localhost:3000",
+        "http://localhost:5173",
     ]
-else:
-    # Development settings
-    DEBUG = config("DEBUG", default=True, cast=bool)
-    ALLOWED_HOSTS = []

@@ -80,10 +80,11 @@ const LogsVisualization: React.FC<LogsVisualizationProps> = ({ logs }) => {
     return acc;
   }, {} as Record<string, { hours: number; count: number }>);
 
-  const totalHours = Object.values(statusTotals).reduce(
-    (sum, status) => sum + status.hours,
-    0
-  );
+  // Calculate total hours (commented out as it's not currently used)
+  // const totalHours = Object.values(statusTotals).reduce(
+  //   (sum, status) => sum + status.hours,
+  //   0
+  // );
 
   return (
     <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-md p-6">

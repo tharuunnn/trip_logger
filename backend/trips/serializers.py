@@ -77,7 +77,9 @@ class LogEntrySerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"duration_hours": "Must be greater than 0."})
         if start is not None and duration is not None:
             if start + duration > 24:
-                raise serializers.ValidationError("Entry extends beyond the day (max 24h).")
+                raise serializers.ValidationError(
+                    "Entry crosses midnight. Split it into two entries: one ending at 24:00 for this day, and another starting at 00:00 on the next day."
+                )
         return attrs
 
 

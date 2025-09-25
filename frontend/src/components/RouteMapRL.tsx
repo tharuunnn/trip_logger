@@ -14,9 +14,10 @@ import {
 // Use a custom tuple alias name to avoid confusion with Leaflet's LatLng class
 type Coord = [number, number];
 
-// Loosen typings from react-leaflet to avoid IDE TS prop mismatches
-const AnyMapContainer = MapContainer as unknown as React.ComponentType<any>;
-const AnyMarker = Marker as unknown as React.ComponentType<any>;
+// Fix for react-leaflet types
+const AnyMapContainer = MapContainer as React.ComponentType<React.ComponentProps<typeof MapContainer>>;
+const AnyMarker = Marker as React.ComponentType<React.ComponentProps<typeof Marker>>;
+const AnyTileLayer = TileLayer as React.ComponentType<React.ComponentProps<typeof TileLayer>>;
 
 interface RouteMapProps {
   routeData?: {
@@ -163,21 +164,26 @@ const RouteMap: React.FC<RouteMapProps> = ({
         {(() => {
           // Build bounds: if we have coords, fit to them; else a small default box
           const defaultCenter: Coord = [20.5937, 78.9629];
-          const defaultBounds: [Coord, Coord] = [
-            [defaultCenter[0] - 2, defaultCenter[1] - 2],
-            [defaultCenter[0] + 2, defaultCenter[1] + 2],
-          ];
-          const bounds = allCoords.length > 1 ? (L.latLngBounds(allCoords as any) as any) : defaultBounds;
+          
+          // Create bounds from allCoords if available, otherwise use default center
+          const bounds = allCoords.length > 0 
+            ? L.latLngBounds(allCoords as any)
+            : L.latLngBounds(
+                [defaultCenter[0] - 2, defaultCenter[1] - 2],
+                [defaultCenter[0] + 2, defaultCenter[1] + 2]
+              );
+            
           return (
             <AnyMapContainer
               style={{ height: 256, width: "100%" }}
               bounds={bounds}
               scrollWheelZoom={false}
             >
-          <TileLayer
-            attribution="© OpenStreetMap contributors"
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
+              <AnyTileLayer
+                attribution="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                noWrap={true}
+              />
           {allCoords.length > 0 && (
             <>
               <Polyline

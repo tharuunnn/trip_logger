@@ -2,7 +2,9 @@ import axios from "axios";
 
 // Create axios instance with base configuration
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || "http://localhost:8000/api",
+  baseURL: import.meta.env.VITE_BACKEND_URL ? 
+    `${import.meta.env.VITE_BACKEND_URL}/api` : 
+    "http://localhost:8000/api",
   headers: {
     "Content-Type": "application/json",
   },
@@ -28,7 +30,38 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    console.error("API Response Error:", error.response?.data || error.message);
+    // Normalize backend (DRF) error shapes into a single error.message string
+    const data = error.response?.data;
+    let message = "Request failed";
+
+    if (data) {
+      if (typeof data === "string") {
+        message = data;
+      } else if (Array.isArray(data?.non_field_errors) && data.non_field_errors.length) {
+        // Most DRF validation errors for object-level validations end up here
+        message = String(data.non_field_errors[0]);
+      } else if (typeof data?.detail === "string") {
+        message = data.detail;
+      } else if (typeof data === "object") {
+        // Try to extract the first field error, e.g., { start_hour: ["Must be within 0-24."] }
+        const keys = Object.keys(data);
+        if (keys.length) {
+          const k = keys[0];
+          const v = (data as any)[k];
+          if (Array.isArray(v) && v.length) {
+            message = `${k}: ${String(v[0])}`;
+          } else if (typeof v === "string") {
+            message = `${k}: ${v}`;
+          }
+        }
+      }
+    } else if (error.message) {
+      message = error.message;
+    }
+
+    // Attach normalized message so callers can display it directly
+    error.message = message;
+    console.error("API Response Error:", data || message);
     return Promise.reject(error);
   }
 );

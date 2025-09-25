@@ -88,7 +88,7 @@ const TripFormPage = () => {
           setLoading(false);
         }
       },
-      (error) => {
+      () => {
         alert("Please allow location access to start the trip");
         setLoading(false);
       },

@@ -53,7 +53,7 @@ class TripViewSet(viewsets.ModelViewSet): # model viewset provides all the CRUD 
     
  
     #for current location, recieved from the frontend (check the form)
-    @method_decorator(ratelimit(key='ip', rate='10/h', method='POST', block=True))
+    #@method_decorator(ratelimit(key='ip', rate='10/h', method='POST', block=True))
     @action(detail=True, methods=['post'])
     def calculate_route(self, request, pk=None):
 
@@ -163,6 +163,18 @@ class LogEntryViewSet(viewsets.ModelViewSet):
             except DailyLog.DoesNotExist:
                 qs = qs.none()
         return qs
+
+    def create(self, request, *args, **kwargs):
+        """Override create to surface validation errors clearly in response."""
+        serializer = self.get_serializer(data=request.data)
+        # Do not raise immediately so we can inspect errors and return them
+        if not serializer.is_valid():
+            # Print on server for quick debugging and return structured errors
+            print("[DEBUG] LogEntry create validation errors:", serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def perform_create(self, serializer):
         daily_log = serializer.validated_data['daily_log']
