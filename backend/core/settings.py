@@ -204,9 +204,14 @@ if 'RENDER' in os.environ:
     # Add WhiteNoise middleware for static files
     MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 
-    # CORS for production
-    CORS_ALLOWED_ORIGINS = [
-        f"https://{os.environ.get('RENDER_EXTERNAL_HOSTNAME', 'localhost')}",
-        "http://localhost:3000",
-        "http://localhost:5173",
-    ]
+    # CORS for production - use environment variable if set
+    if not CORS_ALLOW_ALL_ORIGINS and 'CORS_ALLOWED_ORIGINS' in os.environ:
+        # Use the environment variable (already parsed above)
+        pass  # CORS_ALLOWED_ORIGINS already set from config
+    else:
+        # Fallback to default origins
+        CORS_ALLOWED_ORIGINS = [
+            f"https://{os.environ.get('RENDER_EXTERNAL_HOSTNAME', 'localhost')}",
+            "http://localhost:3000",
+            "http://localhost:5173",
+        ]
