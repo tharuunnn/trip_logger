@@ -8,7 +8,9 @@ interface Trip {
   pickup_location: string;
   dropoff_location: string;
   start_time: string;
+  status: 'upcoming' | 'in_progress' | 'completed';
   cycle_used_hours: number;
+  calculated_cycle_hours: number;
   created_at: string;
 }
 
@@ -16,6 +18,7 @@ const TripsPage = () => {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [updatingStatus, setUpdatingStatus] = useState<number | null>(null);
 
   useEffect(() => {
     fetchTrips();
@@ -35,6 +38,26 @@ const TripsPage = () => {
     }
   };
 
+  const updateTripStatus = async (tripId: number, newStatus: string) => {
+    try {
+      setUpdatingStatus(tripId);
+      await tripAPI.patchTrip(tripId, { status: newStatus });
+      setTrips(prevTrips => 
+        prevTrips.map(trip => 
+          trip.id === tripId 
+            ? { ...trip, status: newStatus as 'upcoming' | 'in_progress' | 'completed' }
+            : trip
+        )
+      );
+    } catch (err: any) {
+      setError(
+        err.response?.data?.detail || err.message || "Failed to update status"
+      );
+    } finally {
+      setUpdatingStatus(null);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -49,6 +72,19 @@ const TripsPage = () => {
     if (cycleHours >= 60) return "text-red-600 bg-red-50";
     if (cycleHours >= 50) return "text-yellow-600 bg-yellow-50";
     return "text-green-600 bg-green-50";
+  };
+
+  const getStatusDisplay = (status: string) => {
+    switch (status) {
+      case 'upcoming':
+        return { text: 'Upcoming', color: 'text-blue-700 bg-blue-100 dark:text-blue-300 dark:bg-blue-900/30' };
+      case 'in_progress':
+        return { text: 'In Progress', color: 'text-yellow-700 bg-yellow-100 dark:text-yellow-300 dark:bg-yellow-900/30' };
+      case 'completed':
+        return { text: 'Completed', color: 'text-green-700 bg-green-100 dark:text-green-300 dark:bg-green-900/30' };
+      default:
+        return { text: 'Unknown', color: 'text-gray-700 bg-gray-100 dark:text-gray-300 dark:bg-gray-900/30' };
+    }
   };
 
   if (loading) {
@@ -147,7 +183,7 @@ const TripsPage = () => {
                 <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                   {
                     trips.filter(
-                      (trip) => new Date(trip.start_time) > new Date()
+                      (trip) => trip.status === 'in_progress'
                     ).length
                   }
                 </p>
@@ -180,7 +216,7 @@ const TripsPage = () => {
                   {trips.length > 0
                     ? (
                         trips.reduce(
-                          (sum, trip) => sum + trip.cycle_used_hours,
+                          (sum, trip) => sum + trip.calculated_cycle_hours,
                           0
                         ) / trips.length
                       ).toFixed(1)
@@ -341,26 +377,34 @@ const TripsPage = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
-                            trip.cycle_used_hours
-                          )}`}
-                        >
-                          {trip.cycle_used_hours}h
-                        </span>
+                        <div className="text-sm">
+                          <span
+                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
+                              trip.calculated_cycle_hours
+                            )}`}
+                          >
+                            {trip.calculated_cycle_hours}h
+                          </span>
+                          {trip.cycle_used_hours > 0 && trip.cycle_used_hours !== trip.calculated_cycle_hours && (
+                            <div className="text-xs text-gray-500 mt-1">
+                              Base: {trip.cycle_used_hours}h
+                            </div>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            new Date(trip.start_time) > new Date()
-                              ? "text-violet-700 bg-violet-100 dark:text-violet-300 dark:bg-violet-900/30"
-                              : "text-green-700 bg-green-100 dark:text-green-300 dark:bg-green-900/30"
+                        <select
+                          value={trip.status}
+                          onChange={(e) => updateTripStatus(trip.id, e.target.value)}
+                          disabled={updatingStatus === trip.id}
+                          className={`text-xs font-semibold rounded-full px-2 py-1 border-0 focus:ring-2 focus:ring-violet-500 ${getStatusDisplay(trip.status).color} ${
+                            updatingStatus === trip.id ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
                           }`}
                         >
-                          {new Date(trip.start_time) > new Date()
-                            ? "Upcoming"
-                            : "Completed"}
-                        </span>
+                          <option value="upcoming">Upcoming</option>
+                          <option value="in_progress">In Progress</option>
+                          <option value="completed">Completed</option>
+                        </select>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <Link

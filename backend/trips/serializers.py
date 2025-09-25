@@ -6,11 +6,17 @@ class TripSerializer(serializers.ModelSerializer):
     """
     Serializer for Trip model with all CRUD operations.
     """
+    calculated_cycle_hours = serializers.SerializerMethodField()
+    
     class Meta:
         model = Trip
         fields = ['id', 'driver_name', 'pickup_location', 'dropoff_location', 
-                 'start_time', 'cycle_used_hours', 'created_at']
+                 'start_time', 'status', 'cycle_used_hours', 'calculated_cycle_hours', 'created_at']
         read_only_fields = ['id', 'created_at']
+    
+    def get_calculated_cycle_hours(self, obj):
+        """Get calculated cycle hours from daily logs."""
+        return obj.calculate_total_cycle_hours()
     
     def validate_cycle_used_hours(self, value):
         """Validate that cycle hours are positive."""

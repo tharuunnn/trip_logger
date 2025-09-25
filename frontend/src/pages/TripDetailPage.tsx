@@ -11,7 +11,9 @@ interface Trip {
   pickup_location: string;
   dropoff_location: string;
   start_time: string;
+  status: 'upcoming' | 'in_progress' | 'completed';
   cycle_used_hours: number;
+  calculated_cycle_hours: number;
   created_at: string;
   daily_logs?: DailyLog[];
 }
@@ -143,6 +145,7 @@ const TripDetailPage = () => {
       console.warn("Failed to fetch cycle remaining", err);
     }
   };
+
 
   const calculateRoute = async () => {
     try {
@@ -475,22 +478,18 @@ const TripDetailPage = () => {
                   <span className="font-medium dark:text-gray-100">{trip.driver_name}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-300">Cycle Used:</span>
-                  <span className="font-medium dark:text-gray-100">{trip.cycle_used_hours}h</span>
-                </div>
-                <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-300">Logs:</span>
                   <span className="font-medium dark:text-gray-100">{logs.length}</span>
                 </div>
                 {cycleInfo && (
                   <div className="mt-4 pt-4 border-t border-gray-200 dark:border-neutral-800 space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-300">Cycle Remaining (70/8):</span>
-                      <span className="font-semibold text-emerald-600 dark:text-emerald-400">{cycleInfo.remaining_hours.toFixed(1)}h</span>
-                    </div>
-                    <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-300">Cycle Used:</span>
                       <span className="font-medium dark:text-gray-100">{cycleInfo.used_hours.toFixed(1)}h</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-300">Cycle Remaining (70/8):</span>
+                      <span className="font-semibold text-emerald-600 dark:text-emerald-400">{cycleInfo.remaining_hours.toFixed(1)}h</span>
                     </div>
                     <div className="text-xs text-gray-500 dark:text-gray-400">
                       Window: {new Date(cycleInfo.window_start).toLocaleDateString()} → {new Date(cycleInfo.window_end).toLocaleDateString()}

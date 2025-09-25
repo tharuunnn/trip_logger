@@ -47,6 +47,9 @@ export const tripAPI = {
   // Update trip
   updateTrip: (id: number, data: any) => api.put(`/trips/${id}/`, data),
 
+  // Partial update trip (for status updates)
+  patchTrip: (id: number, data: any) => api.patch(`/trips/${id}/`, data),
+
   // Delete trip
   deleteTrip: (id: number) => api.delete(`/trips/${id}/`),
 

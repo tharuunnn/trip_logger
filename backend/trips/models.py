@@ -6,10 +6,17 @@ class Trip(models.Model):
     """
     Model representing a trucking trip with pickup and dropoff locations.
     """
+    STATUS_CHOICES = [
+        ('upcoming', 'Upcoming'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+    ]
+    
     driver_name = models.CharField(max_length=100)
     pickup_location = models.CharField(max_length=200)
     dropoff_location = models.CharField(max_length=200)
     start_time = models.DateTimeField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='upcoming')
     cycle_used_hours = models.DecimalField(max_digits=5, decimal_places=2, help_text="Hours used in current cycle")
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -18,6 +25,13 @@ class Trip(models.Model):
     
     def __str__(self):
         return f"Trip {self.id}: {self.pickup_location} → {self.dropoff_location}"
+    
+    def calculate_total_cycle_hours(self):
+        """Calculate total cycle hours from daily logs."""
+        total_hours = 0
+        for log in self.daily_logs.all():
+            total_hours += float(log.driving_hours)
+        return total_hours
 
 
 class DailyLog(models.Model):
