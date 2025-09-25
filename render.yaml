@@ -5,7 +5,7 @@ services:
     env: python
     rootDir: backend
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn --bind 0.0.0.0:$PORT core.wsgi:application
+    startCommand: python manage.py migrate && gunicorn --bind 0.0.0.0:$PORT core.wsgi:application
     envVars:
       - key: RENDER
         value: true
@@ -19,15 +19,14 @@ services:
         fromDatabase:
           name: trip-logger-db
           property: connectionString
-      - key: REDIS_URL
-        fromService:
-          type: redis
-          name: trip-logger-redis
-          property: connectionString
+      - key: CORS_ALLOW_ALL_ORIGINS
+        value: false
       - key: CORS_ALLOWED_ORIGINS
-        value: https://trip-logger-frontend.onrender.com
+        value: https://trip-logger-site.netlify.app
+      - key: CORS_ALLOWED_ORIGIN_REGEXES
+        value: https://.*--trip-logger-site\.netlify\.app
       - key: ALLOWED_HOSTS
-        value: trip-logger-backend.onrender.com
+        value: trip-logger.onrender.com
 
   # Frontend Service
   - type: web
@@ -38,7 +37,7 @@ services:
     staticPublishPath: ./dist
     envVars:
       - key: VITE_BACKEND_URL
-        value: https://trip-logger-backend.onrender.com
+        value: https://trip-logger.onrender.com
       - key: NODE_VERSION
         value: 18.x
 
@@ -48,7 +47,4 @@ databases:
     databaseName: trip_logger
     user: trip_logger_user
 
-# Redis Cache
-  - type: redis
-    name: trip-logger-redis
-    maxmemoryPolicy: allkeys-lru
+# (Redis removed)
